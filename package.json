@@ -1,0 +1,8 @@
+{
+  "name": "soul-safety",
+  "version": "1.0.0",
+  "description": "Soul Safety — A place to feel at home",
+  "dependencies": {
+    "@netlify/blobs": "^8.0.0"
+  }
+}
