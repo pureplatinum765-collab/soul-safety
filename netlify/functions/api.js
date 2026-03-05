@@ -32,17 +32,15 @@ function uuid() {
 }
 
 export default async (req, context) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   const url = new URL(req.url);
-  const path = url.pathname.replace("/.netlify/functions/api", "");
+  const path = url.pathname.replace(/^\/api/, "");
   const store = getStore("soul-safety");
 
   try {
-    // === GET /messages ===
     if (req.method === "GET" && path === "/messages") {
       const since = parseFloat(url.searchParams.get("since") || "0");
       const messages = await getData(store, "messages", []);
@@ -50,7 +48,6 @@ export default async (req, context) => {
       return respond(200, filtered);
     }
 
-    // === POST /messages/text ===
     if (req.method === "POST" && path === "/messages/text") {
       const body = await req.json();
       const messages = await getData(store, "messages", []);
@@ -62,13 +59,11 @@ export default async (req, context) => {
         timestamp: Date.now() / 1000
       };
       messages.push(msg);
-      // Keep last 500 messages
       if (messages.length > 500) messages.splice(0, messages.length - 500);
       await setData(store, "messages", messages);
       return respond(201, msg);
     }
 
-    // === POST /messages/media ===
     if (req.method === "POST" && path === "/messages/media") {
       const formData = await req.formData();
       const userId = formData.get("user_id");
@@ -100,7 +95,6 @@ export default async (req, context) => {
       return respond(201, { ...msg, media_data: undefined });
     }
 
-    // === GET /messages/:id/media ===
     const mediaMatch = path.match(/^\/messages\/([^/]+)\/media$/);
     if (req.method === "GET" && mediaMatch) {
       const msgId = mediaMatch[1];
@@ -116,7 +110,6 @@ export default async (req, context) => {
       });
     }
 
-    // === POST /reactions/:messageId ===
     const reactMatch = path.match(/^\/reactions\/([^/]+)$/);
     if (req.method === "POST" && reactMatch) {
       const messageId = reactMatch[1];
@@ -140,7 +133,6 @@ export default async (req, context) => {
       }
     }
 
-    // === POST /typing ===
     if (req.method === "POST" && path === "/typing") {
       const body = await req.json();
       const typing = await getData(store, "typing", {});
@@ -149,7 +141,6 @@ export default async (req, context) => {
       return respond(200, { ok: true });
     }
 
-    // === POST /read ===
     if (req.method === "POST" && path === "/read") {
       const body = await req.json();
       const reads = await getData(store, "read_receipts", {});
@@ -158,7 +149,6 @@ export default async (req, context) => {
       return respond(200, { ok: true });
     }
 
-    // === POST /mood ===
     if (req.method === "POST" && path === "/mood") {
       const body = await req.json();
       const moods = await getData(store, "moods", {});
@@ -167,7 +157,6 @@ export default async (req, context) => {
       return respond(200, { ok: true });
     }
 
-    // === GET /poll ===
     if (req.method === "GET" && path === "/poll") {
       const since = parseFloat(url.searchParams.get("since") || "0");
       const [messages, reactions, typing, reads, moods] = await Promise.all([
@@ -193,7 +182,6 @@ export default async (req, context) => {
       });
     }
 
-    // === DELETE /messages/:id ===
     const deleteMatch = path.match(/^\/messages\/([^/]+)$/);
     if (req.method === "DELETE" && deleteMatch) {
       const msgId = deleteMatch[1];
@@ -211,5 +199,5 @@ export default async (req, context) => {
 };
 
 export const config = {
-  path: "/.netlify/functions/api/*"
+  path: "/api/*"
 };
