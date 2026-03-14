@@ -1,14 +1,14 @@
 // app.js — Soul Safety v2 — Full Chat Experience with Persistent Backend
 
 const API = "";
-const AUTH_TOKEN = window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken') || '';
 
 function authHeaders(extra = {}) {
+  const AUTH_TOKEN = window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken') || '';
   return AUTH_TOKEN ? { ...extra, Authorization: `Bearer ${AUTH_TOKEN}` } : extra;
 }
 
 // ===== STATE =====
-let currentUser = 'hippiehugs';
+let currentUser = null;
 let messages = [];
 let allReactions = {};
 let readReceipts = {};
@@ -31,11 +31,12 @@ const users = {
 const REACTION_EMOJIS = ['❤️', '😂', '🔥', '💜', '🙌', '✨', '🥺', '🪩'];
 
 // ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initThemeToggle();
   initSparkles();
   initDragDrop();
   initInputListener();
+  await initializeAuthUser();
   loadInitialData();
   startPolling();
   
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== API HELPERS =====
 async function apiGet(path) {
-  const res = await fetch(`${API}${path}`, { headers: authHeaders() });
+  const res = await fetch(`${API}${path}`, { headers: authHeaders(), credentials: 'include' });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
@@ -58,6 +59,7 @@ async function apiPost(path, body) {
   const res = await fetch(`${API}${path}`, {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
+    credentials: 'include',
     body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -65,9 +67,22 @@ async function apiPost(path, body) {
 }
 
 async function apiPostForm(path, formData) {
-  const res = await fetch(`${API}${path}`, { method: 'POST', headers: authHeaders(), body: formData });
+  const res = await fetch(`${API}${path}`, { method: 'POST', headers: authHeaders(), credentials: 'include', body: formData });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
+}
+
+async function initializeAuthUser() {
+  try {
+    const auth = await apiGet('/api/auth/me');
+    if (auth?.user_id) {
+      selectUser(auth.user_id, true);
+      return;
+    }
+  } catch (e) {
+    // Fallback for bearer-token-only environments
+  }
+  if (!currentUser) selectUser('hippiehugs', true);
 }
 
 // ===== LOAD INITIAL DATA =====
@@ -228,13 +243,18 @@ function initSparkles() {
 }
 
 // ===== USER SELECTOR =====
-function selectUser(userId) {
+function selectUser(userId, allowUnknown = false) {
+  if (!allowUnknown && currentUser && currentUser !== userId) return;
   currentUser = userId;
   document.querySelectorAll('.user-option').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.user === userId);
+    if (allowUnknown && userId && btn.dataset.user !== userId) {
+      btn.disabled = true;
+    }
   });
   const input = document.getElementById('messageInput');
-  if (input) input.placeholder = `Message as ${users[userId].name}...`;
+  const name = users[userId]?.name || userId;
+  if (input) input.placeholder = `Message as ${name}...`;
   
   renderFeed();
   requestNotifications();
