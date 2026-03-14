@@ -1,6 +1,11 @@
 // app.js — Soul Safety v2 — Full Chat Experience with Persistent Backend
 
 const API = "";
+const AUTH_TOKEN = window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken') || '';
+
+function authHeaders(extra = {}) {
+  return AUTH_TOKEN ? { ...extra, Authorization: `Bearer ${AUTH_TOKEN}` } : extra;
+}
 
 // ===== STATE =====
 let currentUser = 'hippiehugs';
@@ -44,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ===== API HELPERS =====
 async function apiGet(path) {
-  const res = await fetch(`${API}${path}`);
+  const res = await fetch(`${API}${path}`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }
@@ -52,7 +57,7 @@ async function apiGet(path) {
 async function apiPost(path, body) {
   const res = await fetch(`${API}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
@@ -60,7 +65,7 @@ async function apiPost(path, body) {
 }
 
 async function apiPostForm(path, formData) {
-  const res = await fetch(`${API}${path}`, { method: 'POST', body: formData });
+  const res = await fetch(`${API}${path}`, { method: 'POST', headers: authHeaders(), body: formData });
   if (!res.ok) throw new Error(`API error: ${res.status}`);
   return res.json();
 }

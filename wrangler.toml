@@ -1,0 +1,8 @@
+name = "soul-safety"
+compatibility_date = "2026-03-14"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "soul-safety"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
