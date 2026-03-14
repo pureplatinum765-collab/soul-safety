@@ -24,14 +24,18 @@ let typingTimeout = null;
 let reactionPickerMsgId = null;
 
 const users = {
-  hippiehugs: { name: 'HippieHugs', avatar: '🌻', colorClass: 'hippiehugs' },
+  raphael: { name: 'Raphael', avatar: '🌻', colorClass: 'raphael' },
   taylor: { name: 'Taylor', avatar: '🌿', colorClass: 'taylor' }
 };
 
 const REACTION_EMOJIS = ['❤️', '😂', '🔥', '💜', '🙌', '✨', '🥺', '🪩'];
 
 // ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', async () => {
+function hasAuthToken() {
+  return Boolean(window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken'));
+}
+
+async function bootApp() {
   initThemeToggle();
   initSparkles();
   initDragDrop();
@@ -39,13 +43,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initializeAuthUser();
   loadInitialData();
   startPolling();
-  
+
   // Close reaction picker on outside click
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.reaction-picker') && !e.target.closest('.react-btn')) {
       closeReactionPicker();
     }
   });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (hasAuthToken()) {
+    await bootApp();
+    return;
+  }
+
+  window.addEventListener('soulSafetyUnlocked', async () => {
+    await bootApp();
+  }, { once: true });
 });
 
 // ===== API HELPERS =====
@@ -82,7 +97,7 @@ async function initializeAuthUser() {
   } catch (e) {
     // Fallback for bearer-token-only environments
   }
-  if (!currentUser) selectUser('hippiehugs', true);
+  if (!currentUser) selectUser('raphael', true);
 }
 
 // ===== LOAD INITIAL DATA =====
@@ -275,10 +290,10 @@ async function setMood(userId, emoji, text) {
 }
 
 function renderMoods() {
-  ['hippiehugs', 'taylor'].forEach(uid => {
+  ['raphael', 'taylor'].forEach(uid => {
     const mood = moods[uid];
     if (!mood) return;
-    const statusEl = document.getElementById(uid === 'hippiehugs' ? 'moodStatusHippiehugs' : 'moodStatusTaylor');
+    const statusEl = document.getElementById(uid === 'raphael' ? 'moodStatusRaphael' : 'moodStatusTaylor');
     if (statusEl) {
       statusEl.textContent = `${mood.text} ${mood.emoji}`;
       statusEl.style.transition = 'transform 200ms cubic-bezier(0.16,1,0.3,1)';
@@ -375,7 +390,7 @@ function renderMessage(msg, index) {
   
   // Read receipt (show on last own message only)
   let readHTML = '';
-  const otherUser = currentUser === 'hippiehugs' ? 'taylor' : 'hippiehugs';
+  const otherUser = currentUser === 'raphael' ? 'taylor' : 'raphael';
   if (isOwn && readReceipts[otherUser] === msg.id) {
     readHTML = `<div class="read-receipt">✓ Seen by ${users[otherUser].name}</div>`;
   }

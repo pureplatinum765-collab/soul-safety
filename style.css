@@ -450,7 +450,7 @@
   font-size: 16px;
 }
 
-.mood-avatar.hippiehugs {
+.mood-avatar.raphael {
   background: var(--color-primary-highlight);
 }
 
@@ -562,7 +562,7 @@
   flex-shrink: 0;
 }
 
-.message-avatar.hippiehugs {
+.message-avatar.raphael {
   background: var(--color-primary-highlight);
 }
 
@@ -588,7 +588,7 @@
   color: var(--color-text);
 }
 
-.message-name.hippiehugs { color: var(--color-primary); }
+.message-name.raphael { color: var(--color-primary); }
 .message-name.taylor { color: var(--color-sage); }
 
 .message-time {

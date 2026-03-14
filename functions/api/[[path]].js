@@ -136,7 +136,7 @@ async function execute(env, sql, ...args) {
 
 async function upsertUser(env, userId) {
   if (!userId) return;
-  const displayName = userId === "hippiehugs" ? "Raphael" : userId === "taylor" ? "Taylor" : userId;
+  const displayName = userId === "raphael" ? "Raphael" : userId === "taylor" ? "Taylor" : userId;
   await execute(
     env,
     `INSERT INTO users (id, display_name) VALUES (?, ?)
