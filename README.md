@@ -21,7 +21,7 @@ Migrations are in `migrations/`.
 
 - `0001_initial.sql`: full schema
 - `0002_seed.sql`: seed users + game state
-  - Raphael (`hippiehugs`) → position `6`, points `1`
+  - Raphael (`raphael`) → position `6`, points `1`
   - Taylor (`taylor`) → position `0`, points `0`
 
 ### Apply migrations
