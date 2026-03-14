@@ -1,8 +1,14 @@
 {
   "name": "soul-safety",
-  "version": "1.0.0",
-  "description": "Soul Safety — A place to feel at home",
-  "dependencies": {
-    "@netlify/blobs": "^8.0.0"
+  "version": "2.0.0",
+  "description": "Soul Safety — Cloudflare Pages + Workers + D1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler pages deploy .",
+    "db:migrate": "wrangler d1 migrations apply soul-safety --remote",
+    "db:migrate:local": "wrangler d1 migrations apply soul-safety --local"
+  },
+  "devDependencies": {
+    "wrangler": "^4.6.0"
   }
 }
