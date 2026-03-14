@@ -5,4 +5,4 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "soul-safety"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "41999068-a0e3-4aeb-bca1-b8ca8d938258"
