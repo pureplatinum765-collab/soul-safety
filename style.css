@@ -1382,3 +1382,49 @@ audio {
 .install-dismiss:hover {
   color: #fff;
 }
+
+/* ===== DAILY SPARK ===== */
+.daily-spark-section {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: color-mix(in oklab, var(--color-surface) 92%, var(--color-primary) 8%);
+  border-radius: var(--radius-lg);
+}
+
+.daily-spark-content {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-2);
+}
+
+.daily-spark-meta {
+  font-size: var(--text-xs);
+  opacity: 0.75;
+  margin-bottom: var(--space-3);
+}
+
+.daily-spark-reflection-label {
+  display: block;
+  margin: var(--space-2) 0;
+  font-weight: 600;
+}
+
+.daily-spark-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+}
+
+.daily-spark-status {
+  min-height: 1.2rem;
+  font-size: var(--text-xs);
+  opacity: 0.85;
+}
+
+.btn-chip {
+  border: 1px solid color-mix(in oklab, var(--color-primary) 35%, transparent);
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  color: var(--color-text);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+}

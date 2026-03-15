@@ -1,0 +1,74 @@
+.game-section,
+.curiosity-shop,
+.milanote-section {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 1rem auto;
+}
+
+.curiosity-shop__inner,
+.milanote-section__inner,
+.game-section__inner {
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--color-surface, #faf6ef);
+}
+
+.curiosity-shop__grid {
+  margin-top: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.65rem;
+}
+
+.curiosity-card,
+.btn-game {
+  border: 1px solid rgba(194, 98, 58, 0.35);
+  border-radius: 999px;
+  padding: 0.6rem 0.9rem;
+  background: rgba(194, 98, 58, 0.1);
+  color: inherit;
+  cursor: pointer;
+}
+
+.milanote-section iframe {
+  margin-top: 0.6rem;
+  width: 100%;
+  min-height: 320px;
+  border: 0;
+  border-radius: 12px;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.8rem;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.game-cell {
+  min-height: 62px;
+  border-radius: 10px;
+  border: 1px dashed rgba(61, 36, 22, 0.25);
+  padding: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.game-player-pill {
+  margin-bottom: 0.4rem;
+}
+
+.game-log {
+  font-size: 0.88rem;
+  opacity: 0.92;
+}
+
+@media (max-width: 840px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+}

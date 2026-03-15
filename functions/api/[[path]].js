@@ -277,6 +277,35 @@ async function ensureGamePlayer(env, userId) {
   );
 }
 
+
+async function ensureMinigameTables(env) {
+  await execute(
+    env,
+    `CREATE TABLE IF NOT EXISTS challenges (
+      id TEXT PRIMARY KEY,
+      challenger TEXT NOT NULL,
+      opponent TEXT NOT NULL,
+      game TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      game_state TEXT NOT NULL DEFAULT '{}',
+      message_id TEXT,
+      created_at INTEGER NOT NULL
+    )`
+  );
+
+  await execute(
+    env,
+    `CREATE TABLE IF NOT EXISTS word_reflections (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      date_key TEXT NOT NULL,
+      reflection TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      UNIQUE(user_id, date_key)
+    )`
+  );
+}
+
 async function handleRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -547,8 +576,11 @@ async function handleRequest(context) {
 
     const deleteMatch = path.match(/^\/messages\/([^/]+)$/);
     if (request.method === "DELETE" && deleteMatch) {
-      await execute(env, `DELETE FROM messages WHERE id = ?`, deleteMatch[1]);
-      return json(200, { deleted: deleteMatch[1] });
+      const messageId = deleteMatch[1];
+      await execute(env, `UPDATE read_receipts SET last_read_message_id = NULL WHERE last_read_message_id = ?`, messageId);
+      await execute(env, `UPDATE spark_shares SET message_id = NULL WHERE message_id = ?`, messageId);
+      await execute(env, `DELETE FROM messages WHERE id = ?`, messageId);
+      return json(200, { deleted: messageId });
     }
 
     // ===== Game Endpoints =====
@@ -685,6 +717,198 @@ async function handleRequest(context) {
         ts
       );
       return json(201, { id, spark_id: body.spark_id, user_id: actingUserId, reflection_text: body.reflection_text, created_at: ts });
+    }
+
+
+    // ===== Minigame Challenge Endpoints =====
+    if (request.method === "POST" && path === "/challenge") {
+      await ensureMinigameTables(env);
+      const body = await safeJson(request);
+      const actingUserId = resolveActingUserId(auth.userId, body?.challenger);
+      const opponent = (body?.opponent || (actingUserId === "raphael" ? "taylor" : "raphael") || "").trim();
+      const game = (body?.game || "").trim();
+      if (!actingUserId || !opponent || !game) return json(400, { error: "Invalid payload" });
+      if (!["pong", "rps", "rock-paper-scissors", "lucky-word"].includes(game)) {
+        return json(400, { error: "Unsupported game" });
+      }
+
+      await upsertUser(env, actingUserId);
+      await upsertUser(env, opponent);
+
+      const challengeId = uuid();
+      const ts = nowTs();
+      const challengePayload = {
+        challenge_id: challengeId,
+        challenger: actingUserId,
+        opponent,
+        game,
+        status: "pending",
+        game_state: {},
+        created_at: ts
+      };
+
+      const messageId = uuid();
+      let persistedMessageId = null;
+      try {
+        await execute(
+          env,
+          `INSERT INTO messages (id, user_id, type, content, created_at) VALUES (?, ?, 'challenge', ?, ?)`,
+          messageId,
+          actingUserId,
+          JSON.stringify(challengePayload),
+          ts
+        );
+        persistedMessageId = messageId;
+      } catch {
+        // Compatibility fallback when legacy messages type CHECK disallows 'challenge'.
+        await execute(
+          env,
+          `INSERT INTO messages (id, user_id, type, content, created_at) VALUES (?, ?, 'text', ?, ?)`,
+          messageId,
+          actingUserId,
+          JSON.stringify({ ...challengePayload, message_type: 'challenge' }),
+          ts
+        );
+        persistedMessageId = messageId;
+      }
+
+      await execute(
+        env,
+        `INSERT INTO challenges (id, challenger, opponent, game, status, game_state, message_id, created_at)
+         VALUES (?, ?, ?, ?, 'pending', '{}', ?, ?)`,
+        challengeId,
+        actingUserId,
+        opponent,
+        game,
+        persistedMessageId,
+        ts
+      );
+
+      return json(201, {
+        id: challengeId,
+        challenger: actingUserId,
+        opponent,
+        game,
+        status: "pending",
+        game_state: {},
+        message_id: persistedMessageId,
+        created_at: ts
+      });
+    }
+
+    const challengeRespondMatch = path.match(/^\/challenge\/([^/]+)\/respond$/);
+    if (request.method === "POST" && challengeRespondMatch) {
+      await ensureMinigameTables(env);
+      const body = await safeJson(request);
+      const response = body?.response;
+      if (response !== "accept" && response !== "decline") return json(400, { error: "Invalid response" });
+
+      const challenge = await queryFirst(env, `SELECT * FROM challenges WHERE id = ?`, challengeRespondMatch[1]);
+      if (!challenge) return json(404, { error: "Challenge not found" });
+
+      const actingUserId = auth.userId || body?.user_id || null;
+      if (!actingUserId || actingUserId !== challenge.opponent) {
+        return json(403, { error: "Only the challenged player can respond" });
+      }
+
+      const nextStatus = response === "accept" ? "accepted" : "declined";
+      await execute(env, `UPDATE challenges SET status = ? WHERE id = ?`, nextStatus, challenge.id);
+
+      if (challenge.message_id) {
+        const content = JSON.stringify({
+          challenge_id: challenge.id,
+          challenger: challenge.challenger,
+          opponent: challenge.opponent,
+          game: challenge.game,
+          status: nextStatus
+        });
+        await execute(env, `UPDATE messages SET content = ? WHERE id = ?`, content, challenge.message_id);
+      }
+
+      return json(200, { id: challenge.id, status: nextStatus });
+    }
+
+    const challengeMoveMatch = path.match(/^\/challenge\/([^/]+)\/move$/);
+    if (request.method === "POST" && challengeMoveMatch) {
+      await ensureMinigameTables(env);
+      const body = await safeJson(request);
+      const actingUserId = resolveActingUserId(auth.userId, body?.user_id);
+      if (!actingUserId || body?.move_data === undefined) return json(400, { error: "Invalid payload" });
+
+      const challenge = await queryFirst(env, `SELECT * FROM challenges WHERE id = ?`, challengeMoveMatch[1]);
+      if (!challenge) return json(404, { error: "Challenge not found" });
+      if (actingUserId !== challenge.challenger && actingUserId !== challenge.opponent) {
+        return json(403, { error: "Forbidden" });
+      }
+      if (challenge.status === 'declined') {
+        return json(409, { error: "Challenge was declined" });
+      }
+
+      let gameState = {};
+      try {
+        gameState = challenge.game_state ? JSON.parse(challenge.game_state) : {};
+      } catch {
+        gameState = {};
+      }
+
+      if (!Array.isArray(gameState.moves)) gameState.moves = [];
+      gameState.moves.push({ user_id: actingUserId, move_data: body.move_data, timestamp: nowTs() });
+
+      await execute(env, `UPDATE challenges SET game_state = ?, status = CASE WHEN status = 'pending' THEN 'active' ELSE status END WHERE id = ?`, JSON.stringify(gameState), challenge.id);
+
+      if (challenge.message_id) {
+        const msgContent = JSON.stringify({
+          challenge_id: challenge.id,
+          challenger: challenge.challenger,
+          opponent: challenge.opponent,
+          game: challenge.game,
+          status: challenge.status === 'pending' ? 'active' : challenge.status,
+          game_state: gameState
+        });
+        await execute(env, `UPDATE messages SET content = ? WHERE id = ?`, msgContent, challenge.message_id);
+      }
+
+      return json(200, { id: challenge.id, status: challenge.status === 'pending' ? 'active' : challenge.status, game_state: gameState });
+    }
+
+    // ===== Word Reflection Endpoints =====
+    if (request.method === "GET" && path === "/word-reflection") {
+      await ensureMinigameTables(env);
+      const date = (url.searchParams.get("date") || new Date().toISOString().slice(0, 10)).trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json(400, { error: "Invalid date format. Use YYYY-MM-DD" });
+      const rows = await queryAll(
+        env,
+        `SELECT user_id, reflection FROM word_reflections WHERE date_key = ? ORDER BY created_at ASC`,
+        date
+      );
+      const byUser = Object.fromEntries(rows.map((row) => [row.user_id, row.reflection]));
+      return json(200, byUser);
+    }
+
+    if (request.method === "POST" && path === "/word-reflection") {
+      await ensureMinigameTables(env);
+      const body = await safeJson(request);
+      const actingUserId = resolveActingUserId(auth.userId, body?.user_id);
+      const reflection = typeof body?.reflection === "string" ? body.reflection.trim() : "";
+      const date = (body?.date || new Date().toISOString().slice(0, 10)).trim();
+      if (!actingUserId || !reflection || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return json(400, { error: "Invalid payload" });
+      await upsertUser(env, actingUserId);
+
+      const id = uuid();
+      const ts = nowTs();
+      await execute(
+        env,
+        `INSERT INTO word_reflections (id, user_id, date_key, reflection, created_at)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(user_id, date_key) DO UPDATE SET reflection = excluded.reflection, created_at = excluded.created_at`,
+        id,
+        actingUserId,
+        date,
+        reflection,
+        ts
+      );
+
+      return json(201, { user_id: actingUserId, date, reflection, created_at: ts });
     }
 
     return json(404, { error: "Not found" });
