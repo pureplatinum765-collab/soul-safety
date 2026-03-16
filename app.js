@@ -81,6 +81,9 @@ async function bootApp() {
   initDragDrop();
   initInputListener();
   initDailySparkUi();
+  initPremiumUx();
+  initMascotWidget();
+  initScrollTopButton();
   loadCachedState();
   renderMoods();
   renderFeed();
@@ -107,6 +110,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     await bootApp();
   }, { once: true });
 });
+
+
+
+function initPremiumUx() {
+  const revealTargets = document.querySelectorAll('section, .mood-section, .feed-section, .connection-status, .input-bar');
+  revealTargets.forEach((el) => {
+    if (el.id === 'pinGate') return;
+    el.classList.add('reveal-on-scroll');
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal-on-scroll').forEach((el) => observer.observe(el));
+
+  const hero = document.querySelector('.hero');
+  const heroBg = document.querySelector('.hero-bg--gradient');
+  const heroContent = document.querySelector('.hero-content');
+  if (hero && heroBg && heroContent) {
+    const onParallax = () => {
+      const rect = hero.getBoundingClientRect();
+      const progress = Math.min(Math.max(-rect.top / Math.max(rect.height, 1), 0), 1);
+      heroBg.style.transform = `scale(1.08) translateY(${progress * 40}px)`;
+      heroContent.style.transform = `translateY(${progress * -18}px)`;
+    };
+
+    window.addEventListener('scroll', onParallax, { passive: true });
+    onParallax();
+  }
+}
+
+function initScrollTopButton() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+
+  const onScroll = () => {
+    btn.classList.toggle('visible', window.scrollY > 380);
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+function initMascotWidget() {
+  const mascotButton = document.getElementById('mascotButton');
+  const bubble = document.getElementById('mascotBubble');
+  const response = document.getElementById('mascotResponse');
+  const actions = document.getElementById('mascotActions');
+  if (!mascotButton || !bubble || !response || !actions) return;
+
+  mascotButton.addEventListener('click', () => {
+    const isHidden = bubble.hasAttribute('hidden');
+    if (isHidden) bubble.removeAttribute('hidden');
+    else bubble.setAttribute('hidden', '');
+  });
+
+  actions.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-mascot-person]');
+    if (!target) return;
+
+    const person = target.getAttribute('data-mascot-person');
+    if (person === 'taylor') {
+      response.textContent = "Hey Tay! Hope you're having an amazing day. You're the best thing that ever happened to this site.";
+      return;
+    }
+
+    response.textContent = "Raph! Keep going brother. The world needs what you're building. Proud of you.";
+  });
+}
 
 // ===== API HELPERS =====
 async function apiGet(path) {
