@@ -349,6 +349,31 @@
     <input type="file" id="videoInput" class="file-input-hidden" accept="video/*" onchange="handleFileUpload(event, 'video')">
   </div>
 
+  <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="Scroll to top">
+    ↑
+  </button>
+
+  <div class="mascot-widget" id="mascotWidget" aria-live="polite">
+    <button class="mascot-button" id="mascotButton" type="button" aria-label="Open mascot message">
+      <span class="mascot-skate mascot-skate--left"></span>
+      <span class="mascot-skate mascot-skate--right"></span>
+      <span class="mascot-head"></span>
+      <span class="mascot-body"></span>
+      <span class="mascot-arm mascot-arm--left"></span>
+      <span class="mascot-arm mascot-arm--right"></span>
+      <span class="mascot-eye mascot-eye--left"></span>
+      <span class="mascot-eye mascot-eye--right"></span>
+    </button>
+    <div class="mascot-bubble" id="mascotBubble" hidden>
+      <p class="mascot-bubble-title">Hey! Are you Taylor or Raphael?</p>
+      <div class="mascot-actions" id="mascotActions">
+        <button type="button" data-mascot-person="taylor">Taylor</button>
+        <button type="button" data-mascot-person="raphael">Raphael</button>
+      </div>
+      <p class="mascot-response" id="mascotResponse"></p>
+    </div>
+  </div>
+
   <script>
     const SOUL_SAFETY_PIN = '7777';
     const SOUL_SAFETY_TOKEN_KEY = 'soulSafetyBearerToken';

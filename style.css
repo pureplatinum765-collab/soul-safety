@@ -1428,3 +1428,237 @@ audio {
   border-radius: 999px;
   padding: 0.45rem 0.85rem;
 }
+
+
+/* ===== PREMIUM UX UPGRADE ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at 10% 10%, oklch(from var(--color-disco) l c h / 0.08), transparent 35%),
+    radial-gradient(circle at 85% 15%, oklch(from var(--color-amber) l c h / 0.08), transparent 30%),
+    radial-gradient(circle at 70% 80%, oklch(from var(--color-sage) l c h / 0.08), transparent 35%),
+    var(--color-bg);
+  background-attachment: fixed;
+}
+
+.hero {
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, oklch(from var(--color-text) l c h / 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.12;
+  z-index: 1;
+}
+
+.hero-content {
+  transition: transform 200ms ease-out;
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+button,
+.btn,
+.btn-game,
+.send-btn,
+.input-action-btn,
+.user-option,
+.mood-emoji-btn,
+.curiosity-card,
+.btn-chip {
+  transition: transform var(--transition-interactive), box-shadow var(--transition-interactive), filter var(--transition-interactive), background-color var(--transition-interactive);
+}
+
+button:hover,
+.btn:hover,
+.btn-game:hover,
+.send-btn:hover,
+.curiosity-card:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 8px 25px oklch(from var(--color-primary) l c h / 0.24);
+  filter: saturate(1.08);
+}
+
+button:active,
+.btn:active,
+.btn-game:active,
+.send-btn:active,
+.curiosity-card:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.scroll-top-btn {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 80;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid oklch(from var(--color-border) l c h / 0.8);
+  background: oklch(from var(--color-surface) l c h / 0.92);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+}
+
+.scroll-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.mascot-widget {
+  position: fixed;
+  right: 1rem;
+  bottom: 4.25rem;
+  z-index: 85;
+}
+
+.mascot-button {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 1px solid oklch(from var(--color-border) l c h / 0.8);
+  background: linear-gradient(140deg, var(--color-surface-2), var(--color-primary-highlight));
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: mascotBounce 2.6s ease-in-out infinite;
+}
+
+@keyframes mascotBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.mascot-head, .mascot-body, .mascot-arm, .mascot-eye, .mascot-skate {
+  position: absolute;
+  display: block;
+}
+
+.mascot-head {
+  width: 24px;
+  height: 22px;
+  border-radius: 55% 55% 45% 45%;
+  background: #ffe5cf;
+  top: 12px;
+  left: 22px;
+}
+
+.mascot-body {
+  width: 26px;
+  height: 18px;
+  border-radius: 10px;
+  background: var(--color-disco);
+  top: 32px;
+  left: 21px;
+}
+
+.mascot-eye {
+  width: 3px;
+  height: 3px;
+  background: #3d2416;
+  border-radius: 50%;
+  top: 22px;
+}
+
+.mascot-eye--left { left: 29px; }
+.mascot-eye--right { left: 36px; }
+
+.mascot-arm {
+  width: 7px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ffe5cf;
+  top: 37px;
+}
+
+.mascot-arm--left { left: 16px; transform: rotate(25deg); }
+.mascot-arm--right { left: 45px; transform: rotate(-25deg); }
+
+.mascot-skate {
+  width: 14px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-amber);
+  top: 52px;
+}
+
+.mascot-skate::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #3d2416;
+  left: 2px;
+  bottom: -4px;
+  box-shadow: 6px 0 0 #3d2416;
+}
+
+.mascot-skate--left { left: 19px; }
+.mascot-skate--right { left: 36px; }
+
+.mascot-bubble {
+  position: absolute;
+  right: 0;
+  bottom: 82px;
+  width: min(290px, calc(100vw - 2rem));
+  border-radius: 16px;
+  border: 1px solid oklch(from var(--color-border) l c h / 0.8);
+  background: oklch(from var(--color-surface-2) l c h / 0.98);
+  box-shadow: var(--shadow-lg);
+  padding: 0.9rem;
+}
+
+.mascot-bubble-title {
+  margin: 0 0 0.6rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.mascot-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mascot-actions button {
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 0.45rem 0.75rem;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.mascot-response {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 640px) {
+  .mascot-widget { bottom: 4.6rem; right: 0.7rem; }
+  .scroll-top-btn { right: 0.7rem; bottom: 0.7rem; }
+}
