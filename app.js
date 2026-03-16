@@ -1,6 +1,7 @@
 // app.js — Soul Safety v2 — Full Chat Experience with Persistent Backend
 
 const API = "";
+const APP_STATE_KEY = 'soulSafetyAppStateV1';
 
 function authHeaders(extra = {}) {
   const AUTH_TOKEN = window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken') || '';
@@ -22,6 +23,45 @@ let lastPollTimestamp = 0;
 let pollInterval = null;
 let typingTimeout = null;
 let reactionPickerMsgId = null;
+let dailySpark = null;
+
+function saveAppState() {
+  try {
+    const snapshot = {
+      currentUser,
+      messages,
+      allReactions,
+      readReceipts,
+      moods,
+      lastPollTimestamp,
+      savedAt: Date.now()
+    };
+    localStorage.setItem(APP_STATE_KEY, JSON.stringify(snapshot));
+  } catch (error) {
+    console.warn('Unable to persist app state locally:', error);
+  }
+}
+
+function loadCachedState() {
+  try {
+    const raw = localStorage.getItem(APP_STATE_KEY);
+    if (!raw) return;
+    const snapshot = JSON.parse(raw);
+    if (!snapshot || typeof snapshot !== 'object') return;
+
+    if (Array.isArray(snapshot.messages)) messages = snapshot.messages;
+    if (snapshot.allReactions && typeof snapshot.allReactions === 'object') allReactions = snapshot.allReactions;
+    if (snapshot.readReceipts && typeof snapshot.readReceipts === 'object') readReceipts = snapshot.readReceipts;
+    if (snapshot.moods && typeof snapshot.moods === 'object') moods = snapshot.moods;
+    if (typeof snapshot.lastPollTimestamp === 'number') lastPollTimestamp = snapshot.lastPollTimestamp;
+
+    if (snapshot.currentUser) {
+      selectUser(snapshot.currentUser, true);
+    }
+  } catch (error) {
+    console.warn('Unable to load cached app state:', error);
+  }
+}
 
 const users = {
   raphael: { name: 'Raphael', avatar: '🌻', colorClass: 'raphael' },
@@ -40,7 +80,12 @@ async function bootApp() {
   initSparkles();
   initDragDrop();
   initInputListener();
+  initDailySparkUi();
+  loadCachedState();
+  renderMoods();
+  renderFeed();
   await initializeAuthUser();
+  await refreshDailySpark();
   loadInitialData();
   startPolling();
 
@@ -98,6 +143,7 @@ async function initializeAuthUser() {
     // Fallback for bearer-token-only environments
   }
   if (!currentUser) selectUser('raphael', true);
+  saveAppState();
 }
 
 // ===== LOAD INITIAL DATA =====
@@ -119,10 +165,12 @@ async function loadInitialData() {
     renderMoods();
     scrollToBottom();
     markAsRead();
+    saveAppState();
   } catch (e) {
     console.error('Failed to load initial data:', e);
     // Show fallback
     renderFeed();
+    renderMoods();
   }
 }
 
@@ -186,6 +234,8 @@ function startPolling() {
         if (wasAtBottom) scrollToBottom();
         markAsRead();
       }
+
+      if (changed || data.read_receipts || data.moods) saveAppState();
       
       lastPollTimestamp = data.server_time || lastPollTimestamp;
     } catch (e) {
@@ -223,13 +273,15 @@ function requestNotifications() {
 function initThemeToggle() {
   const toggle = document.querySelector('[data-theme-toggle]');
   const root = document.documentElement;
-  let theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const savedTheme = localStorage.getItem('soulSafetyTheme');
+  let theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   root.setAttribute('data-theme', theme);
 
   if (toggle) {
     toggle.addEventListener('click', () => {
       theme = theme === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', theme);
+      localStorage.setItem('soulSafetyTheme', theme);
       toggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
       toggle.innerHTML = theme === 'dark'
         ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
@@ -261,6 +313,7 @@ function initSparkles() {
 function selectUser(userId, allowUnknown = false) {
   if (!allowUnknown && currentUser && currentUser !== userId) return;
   currentUser = userId;
+  window.currentUser = userId;
   document.querySelectorAll('.user-option').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.user === userId);
     if (allowUnknown && userId && btn.dataset.user !== userId) {
@@ -273,6 +326,81 @@ function selectUser(userId, allowUnknown = false) {
   
   renderFeed();
   requestNotifications();
+  saveAppState();
+}
+
+// ===== DAILY SPARK =====
+function initDailySparkUi() {
+  const shareBtn = document.getElementById('dailySparkShareBtn');
+  const saveBtn = document.getElementById('dailySparkSaveBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const statusEl = document.getElementById('dailySparkStatus');
+      if (!dailySpark?.id || !currentUser) {
+        if (statusEl) statusEl.textContent = 'No spark available to share yet.';
+        return;
+      }
+
+      try {
+        const latestMessage = [...messages].reverse().find((msg) => msg.user_id === currentUser);
+        await apiPost('/api/daily-spark/share', {
+          user_id: currentUser,
+          spark_id: dailySpark.id,
+          message_id: latestMessage?.id || null
+        });
+        if (statusEl) statusEl.textContent = 'Shared to your spark history ✨';
+      } catch (error) {
+        if (statusEl) statusEl.textContent = 'Could not share spark right now.';
+      }
+    });
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      const statusEl = document.getElementById('dailySparkStatus');
+      const reflectionInput = document.getElementById('dailySparkReflectionInput');
+      const reflectionText = reflectionInput?.value?.trim() || '';
+      if (!dailySpark?.id || !currentUser || !reflectionText) {
+        if (statusEl) statusEl.textContent = 'Write a quick reflection first.';
+        return;
+      }
+
+      try {
+        await apiPost('/api/daily-spark/reflect', {
+          user_id: currentUser,
+          spark_id: dailySpark.id,
+          reflection_text: reflectionText
+        });
+        if (statusEl) statusEl.textContent = 'Reflection saved.';
+      } catch (error) {
+        if (statusEl) statusEl.textContent = 'Could not save reflection right now.';
+      }
+    });
+  }
+}
+
+async function refreshDailySpark() {
+  const contentEl = document.getElementById('dailySparkContent');
+  const metaEl = document.getElementById('dailySparkMeta');
+  if (!contentEl || !metaEl) return;
+
+  try {
+    const date = new Date().toISOString().slice(0, 10);
+    const data = await apiGet(`/api/daily-spark/today?date=${date}`);
+    dailySpark = data.spark || null;
+    if (!dailySpark) {
+      contentEl.textContent = 'No spark yet for today.';
+      metaEl.textContent = '';
+      return;
+    }
+
+    contentEl.textContent = dailySpark.content;
+    metaEl.textContent = `${dailySpark.spark_type || 'spark'} · ${dailySpark.spark_date || date}`;
+  } catch (error) {
+    dailySpark = null;
+    contentEl.textContent = 'No spark yet for today.';
+    metaEl.textContent = '';
+  }
 }
 
 // ===== MOOD / VIBE CHECK =====
@@ -287,6 +415,8 @@ async function setMood(userId, emoji, text) {
   } catch (e) {
     console.error('Failed to save mood:', e);
   }
+
+  saveAppState();
 }
 
 function renderMoods() {
@@ -479,6 +609,7 @@ async function toggleReaction(messageId, emoji) {
     allReactions[messageId].push({ user_id: currentUser, emoji });
   }
   renderFeed();
+  saveAppState();
   
   // Send to backend
   try {
@@ -567,18 +698,21 @@ async function sendMessage() {
   updateSendButton();
   renderFeed();
   scrollToBottom();
+  saveAppState();
 
   try {
     const result = await apiPost('/api/messages/text', { user_id: currentUser, content: text });
     // Replace temp message with real one
     const idx = messages.findIndex(m => m.id === tempId);
     if (idx >= 0) messages[idx] = result;
+    saveAppState();
   } catch (e) {
     console.error('Failed to send message:', e);
     // Mark as failed
     const idx = messages.findIndex(m => m.id === tempId);
     if (idx >= 0) messages[idx].failed = true;
     renderFeed();
+    saveAppState();
   }
 }
 
@@ -659,6 +793,7 @@ async function startRecording() {
         messages.push(result);
         renderFeed();
         scrollToBottom();
+        saveAppState();
       } catch (e) {
         console.error('Failed to upload voice note:', e);
       }
@@ -738,6 +873,7 @@ async function handleFileUpload(event, type) {
     messages.push(result);
     renderFeed();
     scrollToBottom();
+    saveAppState();
   } catch (e) {
     console.error('Failed to upload file:', e);
     alert('Upload failed. The file might be too large.');
@@ -787,6 +923,7 @@ async function uploadDroppedFile(file, type) {
     messages.push(result);
     renderFeed();
     scrollToBottom();
+    saveAppState();
   } catch (e) {
     console.error('Failed to upload:', e);
   }
