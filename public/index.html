@@ -376,6 +376,7 @@
 
   <script>
     const SOUL_SAFETY_PIN = '7777';
+    const SOUL_SAFETY_API_TOKEN = 'ss-raphael-taylor-2026';
     const SOUL_SAFETY_TOKEN_KEY = 'soulSafetyBearerToken';
     const existingSoulSafetyToken = localStorage.getItem(SOUL_SAFETY_TOKEN_KEY);
 
@@ -396,9 +397,9 @@
         return;
       }
 
-      localStorage.setItem(SOUL_SAFETY_TOKEN_KEY, SOUL_SAFETY_PIN);
-      window.SOUL_SAFETY_BEARER_TOKEN = SOUL_SAFETY_PIN;
-      window.authToken = SOUL_SAFETY_PIN;
+      localStorage.setItem(SOUL_SAFETY_TOKEN_KEY, SOUL_SAFETY_API_TOKEN);
+      window.SOUL_SAFETY_BEARER_TOKEN = SOUL_SAFETY_API_TOKEN;
+      window.authToken = SOUL_SAFETY_API_TOKEN;
       document.getElementById('pinGate').style.display = 'none';
       error.textContent = '';
       window.dispatchEvent(new Event('soulSafetyUnlocked'));
