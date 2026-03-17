@@ -286,15 +286,24 @@
   <section class="game-section" id="gameSection">
     <div class="game-section__inner vine-border">
       <div class="feed-label">Boardwalk Game Night</div>
+      <div id="turnBanner" class="turn-banner turn-yours">Loading...</div>
       <div class="game-layout">
         <div class="game-board" id="gameBoard" aria-live="polite"></div>
-        <div class="game-side">
+        <div class="game-sidebar">
           <div class="game-players" id="gamePlayers"></div>
+          <div class="dice-area">
+            <div class="dice-display" id="diceDisplay"></div>
+          </div>
           <div class="game-actions">
-            <button type="button" class="btn-game" id="rollDiceBtn">Roll Dice</button>
-            <button type="button" class="btn-game" id="taskCompleteBtn">Complete Task</button>
+            <button type="button" class="btn-game" id="rollDiceBtn">&#x1F3B2; Roll Dice</button>
           </div>
           <div class="game-log" id="gameEventLog"></div>
+          <div class="board-legend">
+            <span class="legend-item">&#x2B50; Bonus +2</span>
+            <span class="legend-item">&#x1F300; Slip back 2</span>
+            <span class="legend-item">&#x2615; Rest stop</span>
+            <span class="legend-item">&#x1F3C1; Finish line</span>
+          </div>
         </div>
       </div>
     </div>
