@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     const current = nowTs();
     const typingUsers = (typingRes.data || [])
-      .filter((t) => Number(t.is_typing) === 1 && current - Number(t.updated_at) < 5)
+      .filter((t) => t.is_typing === true && current - Number(t.updated_at) < 5)
       .map((t) => t.user_id);
 
     const readMap = Object.fromEntries(
