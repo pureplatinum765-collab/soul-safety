@@ -414,9 +414,12 @@
   <script>
     // Register service worker for PWA
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(() => {
-        console.log('Service Worker registered');
-      }).catch(err => console.log('SW registration failed:', err));
+      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+        .then(reg => {
+          console.log('Service Worker registered');
+          reg.update();
+          setInterval(() => reg.update(), 60000);
+        }).catch(err => console.log('SW registration failed:', err));
     }
 
     // PWA install prompt
