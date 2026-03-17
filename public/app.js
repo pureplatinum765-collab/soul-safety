@@ -56,7 +56,7 @@ function loadCachedState() {
     if (typeof snapshot.lastPollTimestamp === 'number') lastPollTimestamp = snapshot.lastPollTimestamp;
 
     if (snapshot.currentUser) {
-      selectUser(snapshot.currentUser, true);
+      selectUser(snapshot.currentUser, false);
     }
   } catch (error) {
     console.warn('Unable to load cached app state:', error);
@@ -224,7 +224,7 @@ async function initializeAuthUser() {
   } catch (e) {
     // Fallback for bearer-token-only environments
   }
-  if (!currentUser) selectUser('raphael', true);
+  if (!currentUser) selectUser('raphael', false);
   saveAppState();
 }
 
@@ -392,13 +392,12 @@ function initSparkles() {
 }
 
 // ===== USER SELECTOR =====
-function selectUser(userId, allowUnknown = false) {
-  if (!allowUnknown && currentUser && currentUser !== userId) return;
+function selectUser(userId, lockSelection = false) {
   currentUser = userId;
   window.currentUser = userId;
   document.querySelectorAll('.user-option').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.user === userId);
-    if (allowUnknown && userId && btn.dataset.user !== userId) {
+    if (lockSelection && userId && btn.dataset.user !== userId) {
       btn.disabled = true;
     }
   });
