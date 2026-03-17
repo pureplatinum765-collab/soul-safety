@@ -1,1 +1,449 @@
-@public/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Soul Safety — A place to feel at home</title>
+  <meta name="description" content="A private, shared digital space for two penpals to exchange voice notes, messages, photos, and videos.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Soul Safety">
+  <meta name="theme-color" content="#c2623a">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+
+  <!-- Fonts -->
+  <link href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,600,700&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./base.css">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./game.css">
+  <link rel="stylesheet" href="./minigames.css">
+
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c2623a'/><path d='M16 8c-3 0-5.5 2-6 5-.5 3 1 5 3 6.5S16 22 16 24c0-2 2.5-3 3-4.5s3.5-3.5 3-6.5c-.5-3-3-5-6-5z' fill='%23faf6ef'/></svg>" type="image/svg+xml">
+  <style>
+    .pin-gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(17, 10, 7, 0.92);
+      backdrop-filter: blur(6px);
+      padding: 1rem;
+    }
+
+    .pin-gate-card {
+      width: min(360px, 100%);
+      padding: 1.25rem;
+      border-radius: 14px;
+      background: #faf6ef;
+      color: #3d2416;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .pin-gate-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .pin-gate-row input {
+      flex: 1;
+      border: 1px solid #d5c7b6;
+      border-radius: 999px;
+      padding: 0.6rem 0.9rem;
+      font-size: 1rem;
+    }
+
+    .pin-gate-row button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.6rem 1rem;
+      background: #c2623a;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .pin-gate-error {
+      color: #b42318;
+      font-size: 0.9rem;
+      min-height: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="pin-gate-overlay" id="pinGate" aria-modal="true" role="dialog">
+    <form class="pin-gate-card" id="pinGateForm">
+      <h2>Enter PIN</h2>
+      <p>Welcome home ✨</p>
+      <div class="pin-gate-row">
+        <input id="pinGateInput" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="4-digit PIN" maxlength="4" required>
+        <button type="submit">Unlock</button>
+      </div>
+      <div class="pin-gate-error" id="pinGateError" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <!-- Disco shimmer bar at top -->
+  <div class="disco-shimmer"></div>
+
+  <!-- Drop zone overlay for drag-and-drop -->
+  <div class="drop-zone-overlay" id="dropZone">
+    <div class="drop-zone-content">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+      </svg>
+      <p>Drop your photos or videos here</p>
+    </div>
+  </div>
+
+  <!-- PWA Install Banner -->
+  <div class="install-banner" id="installBanner" style="display:none">
+    <span>Add Soul Safety to your home screen</span>
+    <button onclick="installPWA()" class="install-btn">Install</button>
+    <button onclick="dismissInstall()" class="install-dismiss">&times;</button>
+  </div>
+
+  <!-- HERO SECTION -->
+  <section class="hero" id="hero">
+    <div class="hero-bg hero-bg--gradient"></div>
+    <div class="hero-overlay"></div>
+    <div class="sparkle-container" id="sparkles"></div>
+    <div class="hero-content">
+      <!-- SVG Logo -->
+      <div class="hero-logo" aria-label="Soul Safety logo">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+          <path d="M40 12C28 12 20 22 18 32C16 42 22 50 30 55C35 58 38 60 40 66C42 60 45 58 50 55C58 50 64 42 62 32C60 22 52 12 40 12Z" 
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="25" cy="20" r="1.5" fill="currentColor" opacity="0.5"/>
+          <circle cx="58" cy="22" r="1" fill="currentColor" opacity="0.4"/>
+          <circle cx="15" cy="40" r="1" fill="currentColor" opacity="0.3"/>
+          <circle cx="65" cy="38" r="1.5" fill="currentColor" opacity="0.4"/>
+          <circle cx="32" cy="70" r="1" fill="currentColor" opacity="0.3"/>
+          <circle cx="50" cy="68" r="1" fill="currentColor" opacity="0.4"/>
+          <path d="M40 36C38 32 34 30 32 32C30 34 30 38 40 44C50 38 50 34 48 32C46 30 42 32 40 36Z" 
+                fill="currentColor" opacity="0.6"/>
+          <circle cx="40" cy="8" r="1" fill="currentColor" opacity="0.6"/>
+          <circle cx="72" cy="40" r="1" fill="currentColor" opacity="0.5"/>
+          <circle cx="8" cy="40" r="1" fill="currentColor" opacity="0.5"/>
+          <circle cx="40" cy="72" r="1" fill="currentColor" opacity="0.6"/>
+        </svg>
+      </div>
+      <h1 class="hero-title shimmer-text">Soul Safety</h1>
+      <p class="hero-tagline">A place to feel at home</p>
+      <button class="btn btn-enter" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'})" 
+              style="display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-6);border-radius:var(--radius-full);background:var(--color-primary);color:var(--color-text-inverse);font-size:var(--text-sm);font-weight:500;font-family:var(--font-body);border:none;transition:all var(--transition-interactive);cursor:pointer;">
+        Come on in
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m0 0l-6-6m6 6l6-6"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <section class="curiosity-shop" id="curiosityShop">
+    <div class="curiosity-shop__inner vine-border">
+      <div class="feed-label">Curiosity Shop</div>
+      <p class="curiosity-shop__subtitle">Spin up a tiny adventure together.</p>
+      <div class="curiosity-shop__grid">
+        <button class="curiosity-card" type="button" data-minigame-launch="pong">🏓 Pong Challenge</button>
+        <button class="curiosity-card" type="button" data-minigame-launch="rps">✂️ Rock Paper Scissors</button>
+        <button class="curiosity-card" type="button" data-minigame-launch="lucky-word">🍀 Lucky Word</button>
+      </div>
+      <div class="challenge-banner" id="challengeBanner" hidden></div>
+    </div>
+  </section>
+
+  <section class="milanote-section" id="pinboard">
+    <div class="milanote-section__inner vine-border">
+      <div class="feed-label">Milanote Pinboard</div>
+      <iframe
+        title="Soul Safety pinboard"
+        src="https://app.milanote.com/1VXZSh1scbV6ed?p=126lorea6Tk"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <!-- STICKY TOP BAR -->
+  <header class="top-bar" id="app">
+    <div class="top-bar-left">
+      <div class="top-bar-logo">
+        <svg width="24" height="24" viewBox="0 0 80 80" fill="none">
+          <path d="M40 12C28 12 20 22 18 32C16 42 22 50 30 55C35 58 38 60 40 66C42 60 45 58 50 55C58 50 64 42 62 32C60 22 52 12 40 12Z" 
+                fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M40 36C38 32 34 30 32 32C30 34 30 38 40 44C50 38 50 34 48 32C46 30 42 32 40 36Z" 
+                fill="currentColor" opacity="0.6"/>
+        </svg>
+        <span>Soul Safety</span>
+      </div>
+      <!-- User selector -->
+      <div class="user-selector" id="userSelector">
+        <button class="user-option active" data-user="raphael" onclick="selectUser('raphael')">
+          <span class="user-avatar-sm">🌻</span>
+          Raphael
+        </button>
+        <button class="user-option" data-user="taylor" onclick="selectUser('taylor')">
+          <span class="user-avatar-sm">🌿</span>
+          Taylor
+        </button>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <div class="recording-indicator" id="recordingIndicator">
+        <span class="recording-dot"></span>
+        Recording...
+      </div>
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <!-- Connection status -->
+    <div class="connection-status" id="connectionStatus">
+      <span class="status-dot"></span>
+      <span>Messages are saved automatically</span>
+    </div>
+
+    <!-- Daily Spark -->
+    <section class="daily-spark-section vine-border" id="dailySparkSection" aria-live="polite">
+      <div class="feed-label">Daily Spark</div>
+      <div class="daily-spark-content" id="dailySparkContent">Loading today’s spark…</div>
+      <div class="daily-spark-meta" id="dailySparkMeta"></div>
+      <div class="daily-spark-actions">
+        <button type="button" class="btn btn-chip" id="dailySparkShareBtn">Share to feed</button>
+      </div>
+      <label class="daily-spark-reflection-label" for="dailySparkReflectionInput">Reflection</label>
+      <textarea id="dailySparkReflectionInput" class="input-text" rows="2" placeholder="What did this spark stir up for you?"></textarea>
+      <div class="daily-spark-actions">
+        <button type="button" class="btn btn-chip" id="dailySparkSaveBtn">Save reflection</button>
+      </div>
+      <div class="daily-spark-status" id="dailySparkStatus" aria-live="polite"></div>
+    </section>
+
+    <!-- Mood / Vibe Check -->
+    <div class="mood-section" id="moodSection">
+      <div class="mood-card" id="moodRaphael">
+        <div class="mood-card-header">
+          <div class="mood-avatar raphael">🌻</div>
+          <span class="mood-name">Raphael</span>
+        </div>
+        <div class="mood-status" id="moodStatusRaphael">feeling cozy 🌿</div>
+        <div class="mood-emoji-picker" data-mood-for="raphael">
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '🌿', 'feeling cozy')">🌿</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '🩩', 'disco mode')">🩩</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '🧶', 'crafting vibes')">🧶</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '🐍', 'snek energy')">🐍</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '🧗', 'climbing high')">🧗</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '✨', 'starmilk hours')">✨</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '🛸', 'roller skating')">🛸</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '💛', 'full of love')">💛</button>
+        </div>
+      </div>
+      <div class="mood-card" id="moodTaylor">
+        <div class="mood-card-header">
+          <div class="mood-avatar taylor">🌿</div>
+          <span class="mood-name">Taylor</span>
+        </div>
+        <div class="mood-status" id="moodStatusTaylor">ready to hang 🛸</div>
+        <div class="mood-emoji-picker" data-mood-for="taylor">
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '🌿', 'feeling cozy')">🌿</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '🩩', 'disco mode')">🩩</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '🐸', 'frog friend mode')">🐸</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '🐇', 'bunny vibes')">🐇</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '🧗', 'summit seeking')">🧗</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '✨', 'cosmic feels')">✨</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '🛸', 'roller skating')">🛸</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '💚', 'full of love')">💚</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed-section vine-border">
+      <div class="feed-label">Shared Feed</div>
+      <div id="feedContainer">
+        <!-- Messages rendered by JS -->
+      </div>
+    </div>
+  </main>
+
+  <section class="game-section" id="gameSection">
+    <div class="game-section__inner vine-border">
+      <div class="feed-label">Boardwalk Game Night</div>
+      <div class="game-layout">
+        <div class="game-board" id="gameBoard" aria-live="polite"></div>
+        <div class="game-side">
+          <div class="game-players" id="gamePlayers"></div>
+          <div class="game-actions">
+            <button type="button" class="btn-game" id="rollDiceBtn">Roll Dice</button>
+            <button type="button" class="btn-game" id="taskCompleteBtn">Complete Task</button>
+          </div>
+          <div class="game-log" id="gameEventLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="minigame-overlay" id="minigameOverlay" hidden>
+      <div class="minigame-modal">
+        <button class="minigame-close" type="button" data-minigame-close aria-label="Close" onclick="window.closeMinigameModal && window.closeMinigameModal()">×</button>
+        <h3 id="minigameTitle">Minigame Challenge</h3>
+        <div id="minigameContent"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INPUT BAR -->
+  <div class="input-bar">
+    <div class="input-bar-inner">
+      <div class="input-actions">
+        <button class="input-action-btn" id="voiceBtn" onclick="toggleRecording()" aria-label="Record voice note" title="Record voice note">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <button class="input-action-btn" onclick="document.getElementById('photoInput').click()" aria-label="Upload photo" title="Upload photo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </button>
+        <button class="input-action-btn" onclick="document.getElementById('videoInput').click()" aria-label="Upload video" title="Upload video">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-text-wrapper">
+        <textarea class="input-text" id="messageInput" placeholder="Type a message..." rows="1" 
+                  onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send message" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <input type="file" id="photoInput" class="file-input-hidden" accept="image/*" onchange="handleFileUpload(event, 'photo')">
+    <input type="file" id="videoInput" class="file-input-hidden" accept="video/*" onchange="handleFileUpload(event, 'video')">
+  </div>
+
+  <button class="scroll-top-btn" id="scrollTopBtn" type="button" aria-label="Scroll to top">
+    ↑
+  </button>
+
+  <div class="mascot-widget" id="mascotWidget" aria-live="polite">
+    <button class="mascot-button" id="mascotButton" type="button" aria-label="Open mascot message">
+      <span class="mascot-skate mascot-skate--left"></span>
+      <span class="mascot-skate mascot-skate--right"></span>
+      <span class="mascot-head"></span>
+      <span class="mascot-body"></span>
+      <span class="mascot-arm mascot-arm--left"></span>
+      <span class="mascot-arm mascot-arm--right"></span>
+      <span class="mascot-eye mascot-eye--left"></span>
+      <span class="mascot-eye mascot-eye--right"></span>
+    </button>
+    <div class="mascot-bubble" id="mascotBubble" hidden>
+      <p class="mascot-bubble-title">Hey! Are you Taylor or Raphael?</p>
+      <div class="mascot-actions" id="mascotActions">
+        <button type="button" data-mascot-person="taylor">Taylor</button>
+        <button type="button" data-mascot-person="raphael">Raphael</button>
+      </div>
+      <p class="mascot-response" id="mascotResponse"></p>
+    </div>
+  </div>
+
+  <script>
+    const SOUL_SAFETY_PIN = '7777';
+    const SOUL_SAFETY_API_TOKEN = 'ss-raphael-taylor-2026';
+    const SOUL_SAFETY_TOKEN_KEY = 'soulSafetyBearerToken';
+    const existingSoulSafetyToken = localStorage.getItem(SOUL_SAFETY_TOKEN_KEY);
+
+    if (existingSoulSafetyToken) {
+      window.SOUL_SAFETY_BEARER_TOKEN = existingSoulSafetyToken;
+      window.authToken = existingSoulSafetyToken;
+      const gate = document.getElementById('pinGate');
+      if (gate) gate.style.display = 'none';
+    }
+
+    document.getElementById('pinGateForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = document.getElementById('pinGateInput');
+      const error = document.getElementById('pinGateError');
+      if (input.value !== SOUL_SAFETY_PIN) {
+        error.textContent = 'Incorrect PIN. Try again.';
+        input.select();
+        return;
+      }
+
+      localStorage.setItem(SOUL_SAFETY_TOKEN_KEY, SOUL_SAFETY_API_TOKEN);
+      window.SOUL_SAFETY_BEARER_TOKEN = SOUL_SAFETY_API_TOKEN;
+      window.authToken = SOUL_SAFETY_API_TOKEN;
+      document.getElementById('pinGate').style.display = 'none';
+      error.textContent = '';
+      window.dispatchEvent(new Event('soulSafetyUnlocked'));
+    });
+
+    if (!existingSoulSafetyToken) {
+      document.getElementById('pinGateInput').focus();
+    }
+  </script>
+  <script src="./app.js"></script>
+  <script src="./game.js"></script>
+  <script src="./minigames.js"></script>
+  <script>
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+        .then(reg => {
+          console.log('Service Worker registered');
+          reg.update();
+          setInterval(() => reg.update(), 60000);
+        }).catch(err => console.log('SW registration failed:', err));
+    }
+
+    // PWA install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('installBanner').style.display = 'flex';
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('installBanner').style.display = 'none';
+        });
+      }
+    }
+
+    function dismissInstall() {
+      document.getElementById('installBanner').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
