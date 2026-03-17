@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     await db.from("typing_status").upsert(
       {
         user_id: actingUserId,
-        is_typing: body.is_typing ? 1 : 0,
+        is_typing: body.is_typing,
         updated_at: nowTs()
       },
       { onConflict: "user_id" }
