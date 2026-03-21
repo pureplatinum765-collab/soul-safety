@@ -46,12 +46,32 @@
   transform: translateY(-1px);
 }
 
-.milanote-section iframe {
-  margin-top: 0.6rem;
-  width: 100%;
-  min-height: 320px;
-  border: 0;
-  border-radius: 12px;
+.pinboard-desc {
+  font-size: 0.88rem;
+  opacity: 0.65;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.pinboard-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(194, 98, 58, 0.35);
+  background: rgba(194, 98, 58, 0.1);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-body, 'General Sans', sans-serif);
+  transition: all 0.2s ease;
+}
+
+.pinboard-link:hover {
+  background: rgba(194, 98, 58, 0.2);
+  transform: translateY(-1px);
 }
 
 /* ========== TURN BANNER ========== */

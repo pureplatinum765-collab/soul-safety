@@ -412,75 +412,59 @@ function selectUser(userId, lockSelection = false) {
 
 // ===== DAILY SPARK =====
 function initDailySparkUi() {
-  const shareBtn = document.getElementById('dailySparkShareBtn');
-  const saveBtn = document.getElementById('dailySparkSaveBtn');
-  if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-      const statusEl = document.getElementById('dailySparkStatus');
-      if (!dailySpark?.id || !currentUser) {
-        if (statusEl) statusEl.textContent = 'No spark available to share yet.';
-        return;
+  // Dismiss button on spark popup
+  const dismissBtn = document.getElementById('sparkPopupDismiss');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      const popup = document.getElementById('sparkPopup');
+      if (popup) {
+        popup.style.opacity = '0';
+        popup.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => { popup.style.display = 'none'; }, 300);
       }
-
-      try {
-        const latestMessage = [...messages].reverse().find((msg) => msg.user_id === currentUser);
-        await apiPost('/api/daily-spark/share', {
-          user_id: currentUser,
-          spark_id: dailySpark.id,
-          message_id: latestMessage?.id || null
-        });
-        if (statusEl) statusEl.textContent = 'Shared to your spark history ✨';
-      } catch (error) {
-        if (statusEl) statusEl.textContent = 'Could not share spark right now.';
-      }
-    });
-  }
-
-  if (saveBtn) {
-    saveBtn.addEventListener('click', async () => {
-      const statusEl = document.getElementById('dailySparkStatus');
-      const reflectionInput = document.getElementById('dailySparkReflectionInput');
-      const reflectionText = reflectionInput?.value?.trim() || '';
-      if (!dailySpark?.id || !currentUser || !reflectionText) {
-        if (statusEl) statusEl.textContent = 'Write a quick reflection first.';
-        return;
-      }
-
-      try {
-        await apiPost('/api/daily-spark/reflect', {
-          user_id: currentUser,
-          spark_id: dailySpark.id,
-          reflection_text: reflectionText
-        });
-        if (statusEl) statusEl.textContent = 'Reflection saved.';
-      } catch (error) {
-        if (statusEl) statusEl.textContent = 'Could not save reflection right now.';
-      }
+      // Remember we showed the spark today so it doesn't re-pop
+      sessionStorage.setItem('sparkShownToday', new Date().toISOString().slice(0, 10));
     });
   }
 }
 
+function showSparkPopup() {
+  if (!dailySpark) return;
+  // Only show once per session per day
+  const today = new Date().toISOString().slice(0, 10);
+  if (sessionStorage.getItem('sparkShownToday') === today) return;
+
+  const popup = document.getElementById('sparkPopup');
+  const quoteEl = document.getElementById('sparkPopupQuote');
+  const sourceEl = document.getElementById('sparkPopupSource');
+  if (!popup || !quoteEl) return;
+
+  quoteEl.textContent = dailySpark.content;
+  if (sourceEl) sourceEl.textContent = dailySpark.source && dailySpark.source !== 'Soul Safety' ? dailySpark.source : '';
+  popup.style.display = 'flex';
+  popup.style.opacity = '1';
+}
+
 async function refreshDailySpark() {
-  const contentEl = document.getElementById('dailySparkContent');
-  const metaEl = document.getElementById('dailySparkMeta');
-  if (!contentEl || !metaEl) return;
+  const inlineEl = document.getElementById('dailySparkInline');
 
   try {
     const date = new Date().toISOString().slice(0, 10);
     const data = await apiGet(`/api/daily-spark/today?date=${date}`);
     dailySpark = data.spark || null;
     if (!dailySpark) {
-      contentEl.textContent = 'No spark yet for today.';
-      metaEl.textContent = '';
+      if (inlineEl) inlineEl.textContent = 'No spark yet for today.';
       return;
     }
 
-    contentEl.textContent = dailySpark.content;
-    metaEl.textContent = `${dailySpark.spark_type || 'spark'} · ${dailySpark.spark_date || date}`;
+    // Update inline card
+    if (inlineEl) inlineEl.textContent = dailySpark.content;
+
+    // Show popup (once per session)
+    showSparkPopup();
   } catch (error) {
     dailySpark = null;
-    contentEl.textContent = 'No spark yet for today.';
-    metaEl.textContent = '';
+    if (inlineEl) inlineEl.textContent = 'No spark yet for today.';
   }
 }
 

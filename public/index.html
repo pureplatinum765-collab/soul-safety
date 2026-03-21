@@ -166,14 +166,12 @@
 
   <section class="milanote-section" id="pinboard">
     <div class="milanote-section__inner vine-border">
-      <div class="feed-label">Milanote Pinboard</div>
-      <iframe
-        title="Soul Safety pinboard"
-        src="https://app.milanote.com/1VXZSh1scbV6ed?p=126lorea6Tk"
-        loading="lazy"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen>
-      </iframe>
+      <div class="feed-label">Pinboard</div>
+      <p class="pinboard-desc">Open your shared pinboard to drop photos, quotes, and inspiration.</p>
+      <a href="https://app.milanote.com/1VXZSh1scbV6ed?p=126lorea6Tk" target="_blank" rel="noopener noreferrer" class="pinboard-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Milanote Pinboard
+      </a>
     </div>
   </section>
 
@@ -220,20 +218,20 @@
       <span>Messages are saved automatically</span>
     </div>
 
-    <!-- Daily Spark -->
-    <section class="daily-spark-section vine-border" id="dailySparkSection" aria-live="polite">
-      <div class="feed-label">Daily Spark</div>
-      <div class="daily-spark-content" id="dailySparkContent">Loading today’s spark…</div>
-      <div class="daily-spark-meta" id="dailySparkMeta"></div>
-      <div class="daily-spark-actions">
-        <button type="button" class="btn btn-chip" id="dailySparkShareBtn">Share to feed</button>
+    <!-- Daily Spark popup overlay (shown on sign-in) -->
+    <div class="spark-popup-overlay" id="sparkPopup" style="display:none">
+      <div class="spark-popup-card">
+        <div class="spark-popup-icon">✦</div>
+        <div class="spark-popup-quote" id="sparkPopupQuote">Loading...</div>
+        <div class="spark-popup-source" id="sparkPopupSource"></div>
+        <button type="button" class="spark-popup-dismiss" id="sparkPopupDismiss">→</button>
       </div>
-      <label class="daily-spark-reflection-label" for="dailySparkReflectionInput">Reflection</label>
-      <textarea id="dailySparkReflectionInput" class="input-text" rows="2" placeholder="What did this spark stir up for you?"></textarea>
-      <div class="daily-spark-actions">
-        <button type="button" class="btn btn-chip" id="dailySparkSaveBtn">Save reflection</button>
-      </div>
-      <div class="daily-spark-status" id="dailySparkStatus" aria-live="polite"></div>
+    </div>
+
+    <!-- Daily Spark (inline mini-card in feed) -->
+    <section class="daily-spark-inline vine-border" id="dailySparkSection">
+      <div class="spark-inline-icon">✦</div>
+      <div class="spark-inline-text" id="dailySparkInline">Loading today's spark...</div>
     </section>
 
     <!-- Mood / Vibe Check -->
