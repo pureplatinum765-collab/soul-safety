@@ -1,0 +1,79 @@
+<!-- 
+  THE WANDERING PATH — Game Section HTML
+  Replace the existing <section class="game-section" id="gameSection"> ... </section>
+  with this block in index.html.
+  
+  Keep the minigameOverlay div intact (used by minigames.js).
+-->
+
+<section class="game-section" id="gameSection">
+  <div class="game-section__inner vine-border">
+
+    <!-- Section header -->
+    <div class="feed-label">The Wandering Path</div>
+
+    <!-- Turn Banner -->
+    <div id="turnBanner" class="turn-banner turn-yours">Loading...</div>
+
+    <!-- Main layout -->
+    <div class="wander-layout">
+
+      <!-- Canvas board -->
+      <div class="wander-canvas-wrap">
+        <canvas id="wanderingCanvas" aria-label="The Wandering Path game board" role="img"></canvas>
+
+        <!-- Win celebration overlay (inside canvas wrap, positioned absolute) -->
+        <div class="wander-win-overlay" id="wanderWinOverlay" aria-live="polite">
+          <div class="win-title">Enlightenment Reached!</div>
+          <div class="win-name"></div>
+          <div class="win-sub">has completed the wandering path</div>
+        </div>
+      </div>
+
+      <!-- Player info cards -->
+      <div class="wander-players" id="wanderingPlayers">
+        <!-- Rendered by game.js -->
+      </div>
+
+      <!-- Narrative text -->
+      <div class="wander-narrative-wrap">
+        <p class="wander-narrative" id="wanderNarrative">The wandering path awaits...</p>
+      </div>
+
+      <!-- Controls: dice + buttons -->
+      <div class="wander-controls">
+        <div class="wander-dice-area">
+          <div class="wander-dice" id="wanderDice" aria-live="polite" aria-label="Dice"></div>
+        </div>
+        <div class="wander-actions">
+          <button type="button" class="btn-game btn-game--primary" id="wanderRollBtn">
+            🎲 Roll the Dice
+          </button>
+          <button type="button" class="btn-game btn-game--secondary" id="wanderResetBtn">
+            ↺ Reset Game
+          </button>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="wander-legend">
+        <span class="legend-item">⭐ Bonus +2 spaces</span>
+        <span class="legend-item">🌀 Slip back 2</span>
+        <span class="legend-item">☕ Rest stop</span>
+        <span class="legend-item">🏁 Finish line</span>
+        <span class="legend-item">🌸 Meadow · 🌲 Forest · ⛰️ Mountain · ✨ Starfield</span>
+      </div>
+
+    </div><!-- /.wander-layout -->
+  </div><!-- /.game-section__inner -->
+
+  <!-- Minigame overlay — do not remove, used by minigames.js -->
+  <div class="minigame-overlay" id="minigameOverlay" hidden>
+    <div class="minigame-modal">
+      <button class="minigame-close" type="button" data-minigame-close aria-label="Close" onclick="window.closeMinigameModal && window.closeMinigameModal()">×</button>
+      <h3 id="minigameTitle">Minigame Challenge</h3>
+      <div id="minigameContent"></div>
+    </div>
+  </div>
+
+</section>

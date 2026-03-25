@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'soul-safety-v7';
+const CACHE_VERSION = 'soul-safety-v8';
 
 self.addEventListener('install', () => {
   self.skipWaiting();

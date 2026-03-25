@@ -1,0 +1,146 @@
+/**
+ * texture.css — Matte, analog feel
+ * Design direction: trevorhallmusic.com — no gloss, no shimmer, no box-shadows.
+ * Paper-like grain, sharp corners, warm surfaces.
+ */
+
+/* ─── Paper Grain Overlay ──────────────────────────────────────────────────── */
+/*
+ * Subtle fractal noise applied as a fixed pseudo-element above all content.
+ * The SVG feTurbulence generates film-grain-style noise tiled at 256px.
+ * z-index sits below pin gate (9999) and bloom (10000) but above page content.
+ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+[data-theme="dark"] body::after {
+  opacity: 0.06;
+  mix-blend-mode: soft-light;
+}
+
+/* ─── Matte Card Base ──────────────────────────────────────────────────────── */
+/*
+ * Replaces glossy card styles with flat, paper-like surfaces.
+ * Sharp 2px corner radius gives an analog, printed-matter feel.
+ */
+.matte-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 2px; /* Sharp, analog corners */
+  box-shadow: none !important;
+}
+
+/* ─── Hero — Remove Glossy Gradients ──────────────────────────────────────── */
+.hero {
+  background: var(--color-bg);
+}
+
+.hero-bg--gradient {
+  background: radial-gradient(
+      ellipse at 30% 40%,
+      oklch(from var(--color-primary) l c h / 0.06) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse at 70% 60%,
+      oklch(from var(--color-sage) l c h / 0.04) 0%,
+      transparent 60%
+    );
+}
+
+/* Fallback for browsers without oklch from() support */
+@supports not (color: oklch(from red l c h)) {
+  .hero-bg--gradient {
+    background: radial-gradient(ellipse at 30% 40%, rgba(194, 98, 58, 0.06) 0%, transparent 70%),
+                radial-gradient(ellipse at 70% 60%, rgba(107, 142, 95, 0.04) 0%, transparent 60%);
+  }
+}
+
+.hero-overlay {
+  background: none;
+}
+
+/* ─── Remove All Box-Shadows ──────────────────────────────────────────────── */
+.pin-gate-card,
+.mood-card,
+.feed-section,
+.curiosity-card,
+.spark-popup-card,
+.minigame-modal,
+.daily-spark-inline,
+.mascot-bubble {
+  box-shadow: none !important;
+  border-radius: 2px;
+}
+
+/* ─── Remove Disco Shimmer Bar ────────────────────────────────────────────── */
+.disco-shimmer {
+  display: none;
+}
+
+/* ─── Remove Hero Title Shimmer — Solid Color Instead ─────────────────────── */
+.shimmer-text {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+  color: var(--color-text);
+  animation: none !important;
+}
+
+/* ─── Global Border-Radius Normalisation — Analog/Paper Feel ──────────────── */
+/*
+ * Override rounded/pill radii throughout the UI.
+ * Keeps things feeling handmade rather than bubbly/app-like.
+ */
+.mood-card,
+.feed-section,
+.curiosity-card,
+.curiosity-shop__inner,
+.milanote-section__inner,
+.daily-spark-inline,
+.spark-popup-card,
+.minigame-modal,
+.mascot-bubble,
+.mascot-button,
+.input-bar-inner,
+.connection-status {
+  border-radius: 2px !important;
+}
+
+/* Slightly more generous on interactive buttons — still tight */
+.btn,
+.btn-enter,
+.btn-game,
+.send-btn,
+.install-btn,
+.mood-emoji-btn,
+.pinboard-link,
+.scroll-top-btn {
+  border-radius: 3px !important;
+}
+
+/* Pin gate input & button stay slightly rounded for usability */
+.pin-gate-row input,
+.pin-gate-row button {
+  border-radius: 4px !important;
+}
+
+/* Pin gate card itself — sharp */
+.pin-gate-card {
+  border-radius: 2px !important;
+}
+
+/* ─── Remove Vine-Border Glow/Shadow if Any ───────────────────────────────── */
+.vine-border {
+  box-shadow: none !important;
+}

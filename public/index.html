@@ -23,6 +23,8 @@
   <!-- Stylesheets -->
   <link rel="stylesheet" href="./base.css">
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./texture.css">
+  <link rel="stylesheet" href="./polaroids.css">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./minigames.css">
 
@@ -83,6 +85,11 @@
   </style>
 </head>
 <body>
+  <!-- Bloom entry animation -->
+  <div id="bloomOverlay" style="position:fixed;inset:0;z-index:10000;background:#110a07;">
+    <canvas id="bloomCanvas" style="width:100%;height:100%;display:block;"></canvas>
+  </div>
+
   <div class="pin-gate-overlay" id="pinGate" aria-modal="true" role="dialog">
     <form class="pin-gate-card" id="pinGateForm">
       <h2>Enter PIN</h2>
@@ -283,29 +290,64 @@
 
   <section class="game-section" id="gameSection">
     <div class="game-section__inner vine-border">
-      <div class="feed-label">Boardwalk Game Night</div>
+
+      <!-- Section header -->
+      <div class="feed-label">The Wandering Path</div>
+
+      <!-- Turn Banner -->
       <div id="turnBanner" class="turn-banner turn-yours">Loading...</div>
-      <div class="game-layout">
-        <div class="game-board" id="gameBoard" aria-live="polite"></div>
-        <div class="game-sidebar">
-          <div class="game-players" id="gamePlayers"></div>
-          <div class="dice-area">
-            <div class="dice-display" id="diceDisplay"></div>
-          </div>
-          <div class="game-actions">
-            <button type="button" class="btn-game" id="rollDiceBtn">&#x1F3B2; Roll Dice</button>
-          </div>
-          <div class="game-log" id="gameEventLog"></div>
-          <div class="board-legend">
-            <span class="legend-item">&#x2B50; Bonus +2</span>
-            <span class="legend-item">&#x1F300; Slip back 2</span>
-            <span class="legend-item">&#x2615; Rest stop</span>
-            <span class="legend-item">&#x1F3C1; Finish line</span>
+
+      <!-- Main layout -->
+      <div class="wander-layout">
+
+        <!-- Canvas board -->
+        <div class="wander-canvas-wrap">
+          <canvas id="wanderingCanvas" aria-label="The Wandering Path game board" role="img"></canvas>
+
+          <!-- Win celebration overlay -->
+          <div class="wander-win-overlay" id="wanderWinOverlay" aria-live="polite">
+            <div class="win-title">Enlightenment Reached!</div>
+            <div class="win-name"></div>
+            <div class="win-sub">has completed the wandering path</div>
           </div>
         </div>
+
+        <!-- Player info cards -->
+        <div class="wander-players" id="wanderingPlayers"></div>
+
+        <!-- Narrative text -->
+        <div class="wander-narrative-wrap">
+          <p class="wander-narrative" id="wanderNarrative">The wandering path awaits...</p>
+        </div>
+
+        <!-- Controls: dice + buttons -->
+        <div class="wander-controls">
+          <div class="wander-dice-area">
+            <div class="wander-dice" id="wanderDice" aria-live="polite" aria-label="Dice"></div>
+          </div>
+          <div class="wander-actions">
+            <button type="button" class="btn-game btn-game--primary" id="wanderRollBtn">
+              🎲 Roll the Dice
+            </button>
+            <button type="button" class="btn-game btn-game--secondary" id="wanderResetBtn">
+              ↺ Reset Game
+            </button>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="wander-legend">
+          <span class="legend-item">⭐ Bonus +2 spaces</span>
+          <span class="legend-item">🌀 Slip back 2</span>
+          <span class="legend-item">☕ Rest stop</span>
+          <span class="legend-item">🏁 Finish line</span>
+          <span class="legend-item">🌸 Meadow · 🌲 Forest · ⛰️ Mountain · ✨ Starfield</span>
+        </div>
+
       </div>
     </div>
 
+    <!-- Minigame overlay -->
     <div class="minigame-overlay" id="minigameOverlay" hidden>
       <div class="minigame-modal">
         <button class="minigame-close" type="button" data-minigame-close aria-label="Close" onclick="window.closeMinigameModal && window.closeMinigameModal()">×</button>
@@ -386,12 +428,27 @@
     const SOUL_SAFETY_API_TOKEN = 'ss-raphael-taylor-2026';
     const SOUL_SAFETY_TOKEN_KEY = 'soulSafetyBearerToken';
     const existingSoulSafetyToken = localStorage.getItem(SOUL_SAFETY_TOKEN_KEY);
+    const bloomAlreadySeen = sessionStorage.getItem('soulSafetyBloomSeen');
 
     if (existingSoulSafetyToken) {
+      // Already authenticated — hide pin gate regardless of bloom
       window.SOUL_SAFETY_BEARER_TOKEN = existingSoulSafetyToken;
       window.authToken = existingSoulSafetyToken;
       const gate = document.getElementById('pinGate');
       if (gate) gate.style.display = 'none';
+    } else if (!bloomAlreadySeen) {
+      // No token + bloom not yet seen: hide pin gate until bloom finishes
+      document.getElementById('pinGate').style.display = 'none';
+
+      // Watch for bloomOverlay removal, then show pin gate
+      const bloomObs = new MutationObserver(() => {
+        if (!document.getElementById('bloomOverlay')) {
+          document.getElementById('pinGate').style.display = '';
+          document.getElementById('pinGateInput').focus();
+          bloomObs.disconnect();
+        }
+      });
+      bloomObs.observe(document.body, { childList: true });
     }
 
     document.getElementById('pinGateForm').addEventListener('submit', (event) => {
@@ -412,11 +469,15 @@
       window.dispatchEvent(new Event('soulSafetyUnlocked'));
     });
 
-    if (!existingSoulSafetyToken) {
+    // Focus input immediately only if bloom was already seen (no overlay playing)
+    if (!existingSoulSafetyToken && bloomAlreadySeen) {
       document.getElementById('pinGateInput').focus();
     }
   </script>
+  <script src="./bloom.js"></script>
+  <script src="./living-canvas.js"></script>
   <script src="./app.js"></script>
+  <script src="./polaroids.js"></script>
   <script src="./game.js"></script>
   <script src="./minigames.js"></script>
   <script>

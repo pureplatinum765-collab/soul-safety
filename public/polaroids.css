@@ -1,0 +1,100 @@
+/* Scattered polaroid photo system */
+.polaroid-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1; /* Above living canvas (0), below content */
+  overflow: hidden;
+}
+
+.polaroid {
+  position: absolute;
+  background: #faf6ef;
+  padding: 6px 6px 24px 6px;
+  border: 1px solid rgba(0,0,0,0.08);
+  pointer-events: auto;
+  cursor: grab;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  /* Matte shadow — very subtle, like paper on paper */
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.06);
+}
+
+.polaroid:hover {
+  transform: scale(1.05) !important;
+  z-index: 10;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.1);
+}
+
+.polaroid img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 1;
+}
+
+.polaroid-caption {
+  font-family: 'General Sans', sans-serif;
+  font-size: 9px;
+  color: #7a6f5e;
+  text-align: center;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dark mode */
+[data-theme="dark"] .polaroid {
+  background: #28231c;
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.2);
+}
+
+[data-theme="dark"] .polaroid-caption {
+  color: #9a8e7c;
+}
+
+/* Sizes — small polaroids, don't dominate the page */
+.polaroid--sm { width: 80px; }
+.polaroid--md { width: 110px; }
+.polaroid--lg { width: 140px; }
+
+/* Animation on entry */
+@keyframes polaroid-drop {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(var(--rot, 0deg));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rot, 0deg));
+  }
+}
+
+.polaroid-enter {
+  animation: polaroid-drop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Tape strip decorative element */
+.polaroid-tape {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 28px;
+  height: 12px;
+  background: rgba(194, 168, 130, 0.38);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+[data-theme="dark"] .polaroid-tape {
+  background: rgba(180, 155, 110, 0.28);
+}
+
+/* Responsive: hide on very small screens to avoid clutter */
+@media (max-width: 600px) {
+  .polaroid-layer { display: none; }
+}
