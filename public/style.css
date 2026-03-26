@@ -1737,7 +1737,7 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: 2;
+  z-index: 0;
   pointer-events: none;
   opacity: 0.032;
   background-image:
@@ -1870,16 +1870,19 @@ body::before {
 }
 
 /* ══════════════════════════════════════════════════════
-   AMBIENT CANVAS SITS BELOW CONTENT (z-index:1)
-   Make sure page content is above it
+   AMBIENT CANVAS SITS BELOW CONTENT
+   Canvas is z-index:0, content needs to sit above it.
+   Only set position/z-index on elements that don't
+   already have a specific position set.
 ══════════════════════════════════════════════════════ */
-.main-content, header, .game-section, .curiosity-shop,
-.milanote-section, .photo-garden, .input-bar, .hero {
+.main-content,
+.game-section,
+.curiosity-shop,
+.milanote-section,
+.photo-garden {
   position: relative;
   z-index: 3;
 }
-.disco-shimmer { z-index: 4; position: relative; }
-.top-bar { z-index: 10; }
 #ss-cat, #ss-weather-btn { z-index: 200; }
 
 /* ══════════════════════════════════════════════════════

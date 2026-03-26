@@ -7,9 +7,14 @@
   canvas.id = 'ss-ambient';
   Object.assign(canvas.style, {
     position:'fixed', top:'0', left:'0', width:'100%', height:'100%',
-    pointerEvents:'none', zIndex:'1',
+    pointerEvents:'none', zIndex:'0',
   });
-  document.body.appendChild(canvas);
+  // Append early but defer to DOMContentLoaded to be safe
+  if (document.body) {
+    document.body.appendChild(canvas);
+  } else {
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(canvas));
+  }
   const ctx = canvas.getContext('2d');
   let W = 0, H = 0;
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
