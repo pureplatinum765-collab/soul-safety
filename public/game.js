@@ -4,12 +4,16 @@
 
   const BOARD_SIZE = 20;
   const SPECIAL = {
-    5:  { type: 'bonus',  label: '⭐', desc: '+2 Forward' },
-    9:  { type: 'hazard', label: '🌀', desc: 'Slip back 2' },
-    10: { type: 'rest',   label: '☕', desc: 'Rest stop' },
-    15: { type: 'bonus',  label: '⭐', desc: '+2 Forward' },
-    17: { type: 'hazard', label: '🌀', desc: 'Slip back 2' },
-    19: { type: 'finish', label: '🏁', desc: 'Finish line' },
+    3:  { type: 'challenge', label: '💬', desc: 'Challenge!' },
+    5:  { type: 'bonus',     label: '⭐', desc: '+2 Forward' },
+    7:  { type: 'trivia',   label: '🔮', desc: 'Trivia!' },
+    9:  { type: 'hazard',   label: '🌀', desc: 'Slip back 2' },
+    10: { type: 'rest',     label: '☕', desc: 'Rest stop' },
+    12: { type: 'challenge', label: '💬', desc: 'Challenge!' },
+    15: { type: 'bonus',    label: '⭐', desc: '+2 Forward' },
+    16: { type: 'trivia',   label: '🔮', desc: 'Trivia!' },
+    17: { type: 'hazard',   label: '🌀', desc: 'Slip back 2' },
+    19: { type: 'finish',   label: '🏁', desc: 'Finish line' },
   };
 
   // ── Challenge cards ───────────────────────────────────────────
@@ -49,7 +53,21 @@
     { icon:'🌸', text:'Rest Stop! Look each other in the eyes and smile for 3 seconds — then roll.' },
   ];
 
+  const TRIVIA = [
+    { icon:'🔮', type:'trivia', text:'Each person writes down their biggest fear — then swap and the other gives it a pep talk.' },
+    { icon:'🧩', type:'trivia', text:'Name 3 things you both genuinely have in common that most people wouldn\'t guess.' },
+    { icon:'🎯', type:'trivia', text:'What\'s one thing the other person does that you wish you could do?' },
+    { icon:'🌍', type:'trivia', text:'If you had to live in a different country for a year, which one and why? Both answer.' },
+    { icon:'📖', type:'trivia', text:'Describe a memory from childhood that shaped who you are. Both share.' },
+    { icon:'🎪', type:'trivia', text:'What\'s the silliest argument you\'ve ever had? Reenact it in 30 seconds.' },
+    { icon:'🔑', type:'trivia', text:'What\'s one door you\'d open if fear wasn\'t a factor? Both answer honestly.' },
+    { icon:'🌈', type:'trivia', text:'Pick a color that represents your mood right now and explain why.' },
+    { icon:'🎭', type:'trivia', text:'If your life were a movie genre — what genre is this current chapter?' },
+    { icon:'🧸', type:'trivia', text:'What\'s something you still carry from being a kid that you\'re proud of?' },
+  ];
+
   function drawChallenge() { return CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)]; }
+  function drawTrivia() { return TRIVIA[Math.floor(Math.random() * TRIVIA.length)]; }
   function drawHazard() { return HAZARD_MSGS[Math.floor(Math.random() * HAZARD_MSGS.length)]; }
   function drawRest() { return REST_MSGS[Math.floor(Math.random() * REST_MSGS.length)]; }
 
@@ -293,16 +311,24 @@
     const me = lastPlayers.find(p => p.user_id === user);
     const pos = me ? Number(me.position) : -1;
 
+    const challengeSpots  = new Set([3, 12]);
+    const triviaSpots     = new Set([7, 16]);
+    const hazardSpots     = new Set([9, 17]);
+    const restSpots       = new Set([10]);
+    const bonusSpots      = new Set([5, 15]);
+
     if (result.won) {
       setTimeout(() => showVictory(user), 300);
-    } else if (pos === 5 || pos === 15) {
+    } else if (challengeSpots.has(pos)) {
       setTimeout(() => showCard(drawChallenge()), 500);
-    } else if (pos === 9 || pos === 17) {
+    } else if (triviaSpots.has(pos)) {
+      setTimeout(() => showCard(drawTrivia()), 500);
+    } else if (hazardSpots.has(pos)) {
       setTimeout(() => showCard(drawHazard()), 400);
-    } else if (pos === 10) {
+    } else if (restSpots.has(pos)) {
       setTimeout(() => showCard(drawRest()), 400);
-    } else if (result.bonus_note) {
-      showToast(result.bonus_note.trim());
+    } else if (bonusSpots.has(pos) || result.bonus_note) {
+      showToast(result.bonus_note ? result.bonus_note.trim() : '⭐ Bonus! +2 spaces!');
     }
 
     if (rollBtn) { rollBtn.textContent = '🎲 Roll Dice'; }

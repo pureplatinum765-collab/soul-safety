@@ -169,12 +169,28 @@
   <!-- MEMORY GARDEN — photos bloom in over time -->
   <section class="photo-garden" id="photoGarden">
     <div class="photo-garden__inner vine-border">
-      <div class="feed-label">Memory Garden</div>
-      <p class="photo-garden__desc">Photos from your feed bloom here over time.</p>
+      <div class="pg-header">
+        <div class="feed-label">Memory Wall</div>
+        <label class="pg-upload-btn" for="pgUploadInput" title="Pin a photo to the wall">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Pin photo
+          <input type="file" id="pgUploadInput" accept="image/*" style="display:none">
+        </label>
+      </div>
+      <p class="photo-garden__desc">Photos pinned here live on the wall forever.</p>
       <div class="photo-garden__grid" id="photoGardenGrid">
-        <!-- Spots populated by JS -->
+        <!-- Polaroids populated by JS -->
+      </div>
+      <div class="pg-upload-progress" id="pgUploadProgress" hidden>
+        <div class="pg-upload-bar" id="pgUploadBar"></div>
+        <span id="pgUploadMsg">Pinning…</span>
       </div>
     </div>
+  </section>
+
+  <!-- OUR GARDEN — collaborative building game -->
+  <section class="garden-section" id="gardenSection">
+    <!-- Built by garden.js -->
   </section>
 
   <section class="milanote-section" id="pinboard">
@@ -310,10 +326,12 @@
           </div>
           <div class="game-log" id="gameEventLog"></div>
           <div class="board-legend">
-            <span class="legend-item">&#x2B50; Bonus +2</span>
-            <span class="legend-item">&#x1F300; Slip back 2</span>
-            <span class="legend-item">&#x2615; Rest stop</span>
-            <span class="legend-item">&#x1F3C1; Finish line</span>
+            <span class="legend-item">⭐ Bonus +2</span>
+            <span class="legend-item">🌀 Slip back 2</span>
+            <span class="legend-item">☕ Rest stop</span>
+            <span class="legend-item">💬 Challenge</span>
+            <span class="legend-item">🔮 Trivia</span>
+            <span class="legend-item">🏁 Finish</span>
           </div>
         </div>
       </div>
@@ -433,61 +451,120 @@
   <script src="./game.js"></script>
   <script src="./minigames.js"></script>
   <script src="./ambient.js"></script>
+  <script src="./streak.js"></script>
+  <script src="./garden.js"></script>
   <script>
-  // Photo Garden — populate bloom spots from shared feed
+  /* ── Memory Wall: polaroid photos with upload ── */
   (function () {
-    const SPOT_COUNT = 12;
-    function initGarden() {
+    const ROTATIONS = [-4,-2.5,-1.5,0,1.5,2.5,4,-3,3,-1,1,-2,2];
+    let knownIds = new Set();
+
+    function getToken() {
+      return window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken');
+    }
+
+    function addPolaroid(msg, delay) {
+      if (knownIds.has(msg.id)) return;
+      knownIds.add(msg.id);
       const grid = document.getElementById('photoGardenGrid');
       if (!grid) return;
-      // Create empty spots
-      for (let i = 0; i < SPOT_COUNT; i++) {
-        const s = document.createElement('div');
-        s.className = 'pg-spot';
-        s.dataset.idx = i;
-        grid.appendChild(s);
-      }
+
+      const rot = ROTATIONS[knownIds.size % ROTATIONS.length];
+      const card = document.createElement('div');
+      card.className = 'pg-polaroid';
+      card.style.setProperty('--rot', rot + 'deg');
+      card.dataset.msgId = msg.id;
+
+      const sender = (msg.user_id || msg.sender_id || 'raphael');
+      const icon = sender === 'raphael' ? '🌻' : '🌿';
+      const name = sender === 'raphael' ? 'Raphael' : 'Taylor';
+      const dateStr = msg.created_at
+        ? new Date(msg.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})
+        : '';
+
+      const img = document.createElement('img');
+      img.alt = 'Shared memory';
+      img.loading = 'lazy';
+      img.src = '/api/messages/' + msg.id + '/media';
+      img.onload = () => {
+        setTimeout(() => card.classList.add('pg-polaroid-in'), delay || 0);
+      };
+      img.onerror = () => { card.remove(); knownIds.delete(msg.id); };
+
+      card.innerHTML = `<div class="pg-polaroid-frame"></div><div class="pg-polaroid-caption">${icon} ${name}${dateStr ? ' · ' + dateStr : ''}</div>`;
+      card.insertBefore(img, card.firstChild);
+      grid.appendChild(card);
     }
 
     async function loadPhotos() {
-      const tok = window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken');
+      const tok = getToken();
       if (!tok) return;
       try {
         const r = await fetch('/api/messages', { headers: { Authorization: 'Bearer ' + tok } });
         if (!r.ok) return;
-        const msgs = await r.json();
-        const photos = (msgs.messages || msgs || []).filter(m => m.type === 'photo' && m.id);
-        if (!photos.length) return;
-        const spots = document.querySelectorAll('.pg-spot');
-        const shuffled = photos.sort(() => Math.random() - 0.5);
-        shuffled.forEach((msg, i) => {
-          if (i >= spots.length) return;
-          const spot = spots[i];
-          // Stagger the bloom reveal
-          setTimeout(() => {
-            const img = document.createElement('img');
-            img.alt = 'Shared memory';
-            img.loading = 'lazy';
-            img.src = '/api/messages/' + msg.id + '/media';
-            img.onload = () => {
-              spot.classList.add('has-photo');
-              spot.appendChild(img);
-              requestAnimationFrame(() => {
-                spot.classList.add('pg-spot-bloom');
-                setTimeout(() => { spot.classList.add('bloomed'); img.style.opacity = '1'; }, 50);
-              });
-            };
-          }, i * 600 + Math.random() * 400);
-        });
+        const data = await r.json();
+        const photos = (data.messages || data || []).filter(m => m.type === 'photo' && m.id);
+        photos.forEach((msg, i) => addPolaroid(msg, i * 220 + Math.random() * 120));
       } catch (_) {}
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      initGarden();
-      // Load after auth
-      if (window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken')) {
-        setTimeout(loadPhotos, 1800);
+    async function uploadPhoto(file) {
+      const tok = getToken();
+      if (!tok || !file) return;
+      const user = window.currentUser || document.querySelector('.user-option.active')?.dataset.user || 'raphael';
+
+      const progress = document.getElementById('pgUploadProgress');
+      const bar = document.getElementById('pgUploadBar');
+      const msg = document.getElementById('pgUploadMsg');
+      if (progress) progress.hidden = false;
+      if (bar) bar.style.width = '0%';
+      if (msg) msg.textContent = 'Pinning to wall…';
+
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('user_id', user);
+      fd.append('sender_id', user);
+      fd.append('type', 'photo');
+
+      try {
+        // Animate bar
+        let pct = 0;
+        const tick = setInterval(() => {
+          pct = Math.min(pct + 8, 85);
+          if (bar) bar.style.width = pct + '%';
+        }, 120);
+
+        const r = await fetch('/api/messages/media', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + tok },
+          body: fd,
+        });
+        clearInterval(tick);
+
+        if (r.ok) {
+          if (bar) bar.style.width = '100%';
+          if (msg) msg.textContent = 'Pinned! 📌';
+          setTimeout(() => { if (progress) progress.hidden = true; }, 1800);
+          setTimeout(loadPhotos, 800);
+        } else {
+          if (msg) msg.textContent = 'Upload failed — try again.';
+          setTimeout(() => { if (progress) progress.hidden = true; }, 2500);
+        }
+      } catch (_) {
+        if (progress) progress.hidden = true;
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('pgUploadInput');
+      if (input) input.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) uploadPhoto(file);
+        e.target.value = '';
+      });
+
+      const tok = getToken();
+      if (tok) setTimeout(loadPhotos, 1800);
       window.addEventListener('soulSafetyUnlocked', () => setTimeout(loadPhotos, 1200));
     });
   })();

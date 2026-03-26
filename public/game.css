@@ -226,6 +226,14 @@
   background: linear-gradient(135deg, rgba(107, 142, 95, 0.1), rgba(107, 142, 95, 0.02));
 }
 
+.cell-challenge {
+  border-color: rgba(100, 140, 200, 0.4);
+  background: linear-gradient(135deg, rgba(100, 140, 200, 0.09), rgba(100, 140, 200, 0.02));
+}
+.cell-trivia {
+  border-color: rgba(155, 109, 181, 0.4);
+  background: linear-gradient(135deg, rgba(155, 109, 181, 0.1), rgba(155, 109, 181, 0.02));
+}
 .cell-finish {
   border-color: rgba(194, 98, 58, 0.5);
   background: linear-gradient(135deg, rgba(194, 98, 58, 0.12), rgba(218, 165, 32, 0.12));

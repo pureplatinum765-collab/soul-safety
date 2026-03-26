@@ -1750,6 +1750,7 @@ body::before {
 /* ══════════════════════════════════════════════════════
    PHOTO GARDEN SECTION
 ══════════════════════════════════════════════════════ */
+/* ── Memory Wall ── */
 .photo-garden {
   width: min(1100px, calc(100% - 2rem));
   margin: 1rem auto;
@@ -1759,56 +1760,270 @@ body::before {
   border-radius: 16px;
   background: var(--color-surface, #faf6ef);
 }
+.pg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.15rem;
+}
+.pg-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(194,98,58,0.35);
+  background: var(--color-surface-2, #fdfbf7);
+  color: var(--color-primary, #c2623a);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.pg-upload-btn:hover {
+  background: rgba(194,98,58,0.1);
+  border-color: rgba(194,98,58,0.55);
+}
 .photo-garden__desc {
-  font-size: 0.87rem;
-  opacity: 0.55;
-  margin: 0.2rem 0 0.9rem;
+  font-size: 0.85rem;
+  opacity: 0.5;
+  margin: 0 0 1rem;
 }
 .photo-garden__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+  min-height: 80px;
 }
-.pg-spot {
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--color-surface-offset, #ede7dc);
-  border: 1.5px solid rgba(61,36,22,0.08);
-  overflow: hidden;
-  position: relative;
-  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s ease;
-  cursor: default;
-}
-.pg-spot::after {
-  content: '🌱';
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; opacity: 0.25;
-  transition: opacity 0.6s ease;
-}
-.pg-spot.has-photo::after { opacity: 0; }
-.pg-spot.has-photo {
-  border-color: rgba(194,98,58,0.25);
+
+/* Polaroid cards */
+.pg-polaroid {
+  --rot: 0deg;
+  width: 130px;
+  background: #fff;
+  padding: 7px 7px 22px;
+  box-shadow: 0 3px 12px rgba(61,36,22,0.14), 0 1px 3px rgba(61,36,22,0.08);
+  border-radius: 2px;
+  transform: rotate(var(--rot)) scale(0.85);
+  opacity: 0;
+  transition: transform 0.38s cubic-bezier(0.16,1,0.3,1),
+              box-shadow 0.3s ease,
+              opacity 0.0s;
   cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
 }
-.pg-spot.has-photo:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(61,36,22,0.14);
+.pg-polaroid.pg-polaroid-in {
+  opacity: 1;
+  transform: rotate(var(--rot)) scale(1);
 }
-.pg-spot img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: cover;
-  opacity: 0; transition: opacity 1.2s ease;
+.pg-polaroid:hover {
+  transform: rotate(0deg) scale(1.06) translateY(-4px);
+  box-shadow: 0 10px 32px rgba(61,36,22,0.18);
+  z-index: 2;
+}
+.pg-polaroid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 1px;
+}
+.pg-polaroid-caption {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  text-align: center;
+  color: var(--color-text-muted, #7a6f5e);
+  font-family: var(--font-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 2px;
+}
+.pg-upload-progress {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+.pg-upload-bar {
+  height: 4px;
+  width: 0%;
+  background: var(--color-primary, #c2623a);
+  border-radius: 4px;
+  transition: width 0.12s linear;
+  flex: 1;
+}
+
+/* ── Our Garden section ── */
+.garden-section {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 1rem auto;
+  position: relative;
+  z-index: 3;
+}
+.gn-inner {
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: var(--color-surface, #faf6ef);
+}
+.gn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.1rem;
+}
+.gn-count-wrap {
+  font-size: 0.82rem;
+  opacity: 0.55;
+  font-family: var(--font-body);
+}
+.gn-desc {
+  font-size: 0.85rem;
+  opacity: 0.5;
+  margin: 0 0 0.9rem;
+}
+.gn-stage {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0.9rem;
+  box-shadow: inset 0 1px 4px rgba(61,36,22,0.06);
+}
+.gn-scene {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background: linear-gradient(180deg, #b8d4e8 0%, #d0e6d4 45%, #8aab7e 100%);
+  overflow: hidden;
+}
+.gn-sky {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 45%;
+  background: linear-gradient(180deg, #c5ddf0 0%, transparent 100%);
+}
+.gn-ground {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 38%;
+  background: linear-gradient(180deg, #8aab7e 0%, #6b8c60 100%);
+  border-radius: 60% 60% 0 0 / 30% 30% 0 0;
+}
+.gn-empty-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.9rem;
+  color: rgba(61,36,22,0.5);
+  line-height: 1.6;
+  pointer-events: none;
+  padding: 1rem;
+}
+/* Garden items */
+.gn-item {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.55s cubic-bezier(0.16,1,0.3,1),
+              opacity 0.4s ease;
+  cursor: default;
+  user-select: none;
+  text-align: center;
+  line-height: 1;
+}
+.gn-item.gn-visible {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+.gn-item:hover { transform: translate(-50%, -50%) scale(1.3); }
+.gn-emoji { font-size: 1.6rem; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+.gn-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
   border-radius: 50%;
+  position: absolute;
+  bottom: -3px; right: -3px;
+  border: 1.5px solid rgba(255,255,255,0.8);
 }
-.pg-spot.bloomed img { opacity: 1; }
-.pg-spot-bloom {
-  animation: pgBloom 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+.gn-dot-r { background: #c9922a; }
+.gn-dot-t { background: #6b7f5e; }
+
+/* Garden action buttons */
+.gn-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
 }
-@keyframes pgBloom {
-  0%   { transform: scale(0.5); opacity: 0; }
-  60%  { transform: scale(1.08); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+.gn-action-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  border: 1.5px solid rgba(61,36,22,0.1);
+  background: var(--color-surface-2, #fdfbf7);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+  font-family: var(--font-body);
+  color: var(--color-text);
+}
+.gn-action-btn:hover {
+  border-color: rgba(194,98,58,0.4);
+  background: rgba(194,98,58,0.07);
+  transform: translateY(-2px);
+}
+.gn-action-btn:active { transform: scale(0.94); }
+.gn-action-emoji { font-size: 1.25rem; line-height: 1; }
+.gn-action-label { font-size: 0.68rem; opacity: 0.6; white-space: nowrap; }
+
+.gn-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  opacity: 0.5;
+}
+.gn-toast {
+  position: absolute;
+  bottom: 1rem; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--color-text, #2c2419);
+  color: var(--color-text-inverse, #faf6ef);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+.gn-toast.gn-toast-in {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+[data-theme="dark"] .pg-polaroid {
+  background: #2a2520;
+}
+[data-theme="dark"] .pg-polaroid-caption { color: rgba(255,255,255,0.45); }
+[data-theme="dark"] .gn-inner { background: var(--color-surface, #211d17); }
+[data-theme="dark"] .gn-action-btn {
+  background: var(--color-surface-2, #28231c);
+  border-color: rgba(255,255,255,0.07);
+}
+[data-theme="dark"] .gn-scene {
+  background: linear-gradient(180deg, #1e2e3a 0%, #1f3025 45%, #2a4020 100%);
 }
 
 /* ══════════════════════════════════════════════════════
