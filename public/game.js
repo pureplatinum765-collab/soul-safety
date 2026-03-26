@@ -1,81 +1,181 @@
+/* game.js — Board game with challenge cards */
 (function () {
-  const GAME_API = window.GAME_API || '';
-  const BOARD_SIZE = 20;
+  'use strict';
 
-  /* Special spaces config */
+  const BOARD_SIZE = 20;
   const SPECIAL = {
-    5:  { type: 'bonus', label: '⭐', desc: '+2 Forward' },
+    5:  { type: 'bonus',  label: '⭐', desc: '+2 Forward' },
     9:  { type: 'hazard', label: '🌀', desc: 'Slip back 2' },
-    15: { type: 'bonus', label: '⭐', desc: '+2 Forward' },
+    10: { type: 'rest',   label: '☕', desc: 'Rest stop' },
+    15: { type: 'bonus',  label: '⭐', desc: '+2 Forward' },
     17: { type: 'hazard', label: '🌀', desc: 'Slip back 2' },
-    10: { type: 'rest', label: '☕', desc: 'Rest stop' },
-    19: { type: 'finish', label: '🏁', desc: 'Finish line' }
+    19: { type: 'finish', label: '🏁', desc: 'Finish line' },
   };
 
-  function gameHeaders(extra = {}) {
-    const token = window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken') || '';
-    return token ? { ...extra, Authorization: 'Bearer ' + token } : extra;
+  // ── Challenge cards ───────────────────────────────────────────
+  const CHALLENGES = [
+    { icon:'💬', type:'truth',  text:'What made you laugh the most recently? Share the story.' },
+    { icon:'🎨', type:'create', text:'Describe your dream home in exactly 5 words each.' },
+    { icon:'🌿', type:'share',  text:'Share a song that describes exactly how you feel today.' },
+    { icon:'🌙', type:'dream',  text:'If you woke up anywhere tomorrow — where would it be?' },
+    { icon:'🔮', type:'wonder', text:'What\'s one thing you\'ve always wanted to learn but haven\'t?' },
+    { icon:'🌸', type:'bloom',  text:'Share the most beautiful thing you\'ve seen this week.' },
+    { icon:'⚡', type:'brave',  text:'Name something you\'re proud of that you rarely talk about.' },
+    { icon:'☕', type:'cozy',   text:'Describe your perfect cozy day together in 3 sentences.' },
+    { icon:'💛', type:'truth',  text:'What do you appreciate about the other person right now?' },
+    { icon:'🌟', type:'dream',  text:'If you had a superpower for one day — what and why?' },
+    { icon:'📷', type:'share',  text:'Share the last photo that made you smile from your camera roll.' },
+    { icon:'🖊️', type:'create', text:'Write each other a 3-word poem about this exact moment.' },
+    { icon:'🌊', type:'wonder', text:'If you could talk to any animal, which one and what would you ask?' },
+    { icon:'🌺', type:'bloom',  text:'What\'s one thing that feels like home to you?' },
+    { icon:'🦋', type:'brave',  text:'Share something you\'re currently growing within yourself.' },
+    { icon:'🎵', type:'share',  text:'Hum or describe the melody stuck in your head right now.' },
+    { icon:'🌄', type:'dream',  text:'Describe your ideal morning in vivid detail.' },
+    { icon:'✨', type:'wonder', text:'What small ordinary thing do you find secretly magical?' },
+    { icon:'🤝', type:'truth',  text:'Say one thing you\'ve been meaning to tell the other person.' },
+    { icon:'🌱', type:'bloom',  text:'What\'s one tiny thing you want to nurture this week?' },
+  ];
+
+  const HAZARD_MSGS = [
+    { icon:'🌀', text:'Whoa — slipped on a dream cloud! Back 2 spaces, but here\'s a hug 🤗' },
+    { icon:'🍃', text:'A friendly wind blew you backwards — back 2 spaces! Regroup and roll again soon.' },
+    { icon:'🌊', text:'Caught a sneaky wave! Slide back 2 spaces, but the ocean says hello.' },
+    { icon:'🐾', text:'A tiny creature asked you to come back — back 2 spaces, they needed the company.' },
+  ];
+
+  const REST_MSGS = [
+    { icon:'☕', text:'Rest Stop! Take a real breath together. Close your eyes for 5 seconds before continuing.' },
+    { icon:'🌿', text:'Rest Stop! Name one thing each of you is grateful for right now.' },
+    { icon:'🌸', text:'Rest Stop! Look each other in the eyes and smile for 3 seconds — then roll.' },
+  ];
+
+  function drawChallenge() { return CHALLENGES[Math.floor(Math.random() * CHALLENGES.length)]; }
+  function drawHazard() { return HAZARD_MSGS[Math.floor(Math.random() * HAZARD_MSGS.length)]; }
+  function drawRest() { return REST_MSGS[Math.floor(Math.random() * REST_MSGS.length)]; }
+
+  function _getGameContainer() {
+    return document.querySelector('.game-section__inner') || document.getElementById('gameSection');
   }
 
+  function showCard(card) {
+    const container = _getGameContainer();
+    if (!container) return;
+    const old = container.querySelector('.gc-overlay');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.className = 'gc-overlay';
+    el.innerHTML = `
+      <div class="gc-card">
+        <div class="gc-icon">${card.icon}</div>
+        <div class="gc-type">${card.type || ''}</div>
+        <div class="gc-text">${card.text}</div>
+        <button class="btn-game gc-close">Got it ✓</button>
+      </div>`;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('gc-show'));
+    el.querySelector('.gc-close').addEventListener('click', () => {
+      el.classList.remove('gc-show');
+      setTimeout(() => el.remove(), 320);
+    });
+  }
+
+  function showVictory(user) {
+    const container = _getGameContainer();
+    if (!container) return;
+    const old = container.querySelector('.gc-overlay');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.className = 'gc-overlay gc-victory';
+    const name = user === 'raphael' ? '🌻 Raphael' : '🌿 Taylor';
+    el.innerHTML = `
+      <div class="gc-card">
+        <div class="gc-icon">🏆</div>
+        <div class="gc-type">winner</div>
+        <div class="gc-text">${name} wins the round! A new game starts next roll.</div>
+        <button class="btn-game gc-close">Celebrate! 🎉</button>
+      </div>`;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('gc-show'));
+    el.querySelector('.gc-close').addEventListener('click', () => {
+      el.classList.remove('gc-show');
+      setTimeout(() => el.remove(), 320);
+    });
+    _launchConfetti(container);
+  }
+
+  function _launchConfetti(container) {
+    const colors = ['#c2623a','#c9922a','#6b7f5e','#9b6db5','#d4a060','#a0c080'];
+    for (let i = 0; i < 40; i++) {
+      setTimeout(() => {
+        const p = document.createElement('div');
+        p.className = 'gc-confetti';
+        p.style.cssText = `
+          position:absolute; left:${20+Math.random()*60}%; top:0;
+          width:${6+Math.random()*6}px; height:${6+Math.random()*6}px;
+          background:${colors[Math.floor(Math.random()*colors.length)]};
+          border-radius:${Math.random()>0.5?'50%':'2px'};
+          animation:confettiFall ${1.2+Math.random()*1.4}s ease forwards;
+          transform:rotate(${Math.random()*360}deg);
+          opacity:0.9; pointer-events:none; z-index:9990;
+        `;
+        container.appendChild(p);
+        setTimeout(() => p.remove(), 3000);
+      }, i * 60);
+    }
+  }
+
+  // ── Game state tracking ───────────────────────────────────────
+  let lastPlayers = [];
+  let currentWhoseTurn = 'raphael';
+
+  function gameHeaders(extra) {
+    const tok = window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken') || '';
+    return tok ? { ...extra, Authorization: 'Bearer ' + tok } : { ...extra };
+  }
   async function gameGet(path) {
-    const response = await fetch(GAME_API + path, { headers: gameHeaders(), credentials: 'include' });
-    if (!response.ok) throw new Error('Game API error: ' + response.status);
-    return response.json();
+    const r = await fetch(path, { headers: gameHeaders({}), credentials: 'include' });
+    if (!r.ok) throw new Error('Game API ' + r.status);
+    return r.json();
   }
-
   async function gamePost(path, body) {
-    const response = await fetch(GAME_API + path, {
+    const r = await fetch(path, {
       method: 'POST',
       headers: gameHeaders({ 'Content-Type': 'application/json' }),
       credentials: 'include',
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
-    return response.json();
+    return r.json();
   }
 
   function getCurrentUser() {
     return window.currentUser || document.querySelector('.user-option.active')?.dataset.user || 'raphael';
   }
 
-  /* Snaking board layout: row 0 goes right (0-4), row 1 goes left (9-5), row 2 goes right (10-14), row 3 goes left (19-15) */
   function getCellOrder() {
-    return [
-      0, 1, 2, 3, 4,      // row 0: left to right
-      9, 8, 7, 6, 5,       // row 1: right to left (snake back)
-      10, 11, 12, 13, 14,  // row 2: left to right
-      19, 18, 17, 16, 15   // row 3: right to left (snake back)
-    ];
+    return [0,1,2,3,4, 9,8,7,6,5, 10,11,12,13,14, 19,18,17,16,15];
   }
 
   function renderBoard(players, whoseTurn) {
     const board = document.getElementById('gameBoard');
     if (!board) return;
-
     const cellOrder = getCellOrder();
-    const playerPositions = {};
+    const byPos = {};
     (players || []).forEach(p => {
       const pos = Number(p.position);
-      if (!playerPositions[pos]) playerPositions[pos] = [];
-      playerPositions[pos].push(p);
+      if (!byPos[pos]) byPos[pos] = [];
+      byPos[pos].push(p);
     });
-
-    board.innerHTML = cellOrder.map((cellIdx, visualIdx) => {
-      const special = SPECIAL[cellIdx] || null;
-      const inCell = (playerPositions[cellIdx] || []).map(p =>
-        '<span class="game-token ' + (p.user_id === 'raphael' ? 'token-raphael' : 'token-taylor') + '">' +
-        (p.user_id === 'raphael' ? '🌻' : '🌿') + '</span>'
+    board.innerHTML = cellOrder.map(cellIdx => {
+      const spec = SPECIAL[cellIdx] || null;
+      const inCell = (byPos[cellIdx] || []).map(p =>
+        `<span class="game-token ${p.user_id === 'raphael' ? 'token-raphael' : 'token-taylor'}">${p.user_id === 'raphael' ? '🌻' : '🌿'}</span>`
       ).join('');
-
-      const isStart = cellIdx === 0;
-      const isFinish = cellIdx === BOARD_SIZE - 1;
-      const specialClass = special ? ' cell-' + special.type : '';
-      const startClass = isStart ? ' cell-start' : '';
-
-      return '<div class="game-cell' + specialClass + startClass + '" data-cell="' + cellIdx + '">' +
-        '<div class="cell-number">' + cellIdx + '</div>' +
-        (special ? '<div class="cell-special">' + special.label + '</div>' : '') +
-        '<div class="cell-tokens">' + inCell + '</div>' +
-        '</div>';
+      const cls = ['game-cell', spec ? 'cell-' + spec.type : '', cellIdx === 0 ? 'cell-start' : ''].filter(Boolean).join(' ');
+      return `<div class="${cls}" data-cell="${cellIdx}">
+        <div class="cell-number">${cellIdx}</div>
+        ${spec ? `<div class="cell-special">${spec.label}</div>` : ''}
+        <div class="cell-tokens">${inCell}</div>
+      </div>`;
     }).join('');
   }
 
@@ -83,16 +183,16 @@
     const el = document.getElementById('gamePlayers');
     if (!el) return;
     el.innerHTML = (players || []).map(p => {
-      const isRaphael = p.user_id === 'raphael';
+      const isR = p.user_id === 'raphael';
       const isTurn = p.user_id === whoseTurn;
-      return '<div class="game-player-pill' + (isTurn ? ' player-active' : '') + '">' +
-        '<span class="player-icon">' + (isRaphael ? '🌻' : '🌿') + '</span>' +
-        '<span class="player-info">' +
-          '<span class="player-name">' + (isRaphael ? 'Raphael' : 'Taylor') + '</span>' +
-          '<span class="player-stats">Space ' + p.position + ' · ' + p.points + ' pts</span>' +
-        '</span>' +
-        (isTurn ? '<span class="turn-badge">Your roll</span>' : '') +
-        '</div>';
+      return `<div class="game-player-pill${isTurn ? ' player-active' : ''}">
+        <span class="player-icon">${isR ? '🌻' : '🌿'}</span>
+        <span class="player-info">
+          <span class="player-name">${isR ? 'Raphael' : 'Taylor'}</span>
+          <span class="player-stats">Space ${p.position} · ${p.points} pts</span>
+        </span>
+        ${isTurn ? '<span class="turn-badge">Your roll</span>' : ''}
+      </div>`;
     }).join('');
   }
 
@@ -107,75 +207,62 @@
       const user = evt.user_id === 'raphael' ? '🌻' : '🌿';
       const note = evt.note || evt.event_type;
       const isWin = evt.event_type === 'game_won';
-      return '<div class="event-row' + (isWin ? ' event-win' : '') + '">' +
-        '<span class="event-user">' + user + '</span>' +
-        '<span class="event-text">' + note + '</span>' +
-        '</div>';
+      return `<div class="event-row${isWin ? ' event-win' : ''}">
+        <span class="event-user">${user}</span>
+        <span class="event-text">${note}</span>
+      </div>`;
     }).join('');
   }
 
   function updateTurnIndicator(whoseTurn) {
-    const currentUser = getCurrentUser();
-    const isMyTurn = currentUser === whoseTurn;
+    const me = getCurrentUser();
+    const isMyTurn = me === whoseTurn;
     const rollBtn = document.getElementById('rollDiceBtn');
-    const turnBanner = document.getElementById('turnBanner');
-
+    const banner = document.getElementById('turnBanner');
     if (rollBtn) {
       rollBtn.disabled = !isMyTurn;
       rollBtn.classList.toggle('btn-disabled', !isMyTurn);
     }
-
-    if (turnBanner) {
+    if (banner) {
       const name = whoseTurn === 'raphael' ? 'Raphael' : 'Taylor';
       const emoji = whoseTurn === 'raphael' ? '🌻' : '🌿';
-      if (isMyTurn) {
-        turnBanner.innerHTML = emoji + ' Your turn — roll the dice!';
-        turnBanner.className = 'turn-banner turn-yours';
-      } else {
-        turnBanner.innerHTML = emoji + ' Waiting for ' + name + '...';
-        turnBanner.className = 'turn-banner turn-waiting';
-      }
+      banner.innerHTML = isMyTurn
+        ? `${emoji} Your turn — roll the dice!`
+        : `${emoji} Waiting for ${name}…`;
+      banner.className = `turn-banner ${isMyTurn ? 'turn-yours' : 'turn-waiting'}`;
     }
   }
-
-  let currentWhoseTurn = 'raphael';
 
   async function refreshGameState() {
     try {
       const state = await gameGet('/api/game/state');
       currentWhoseTurn = state.whose_turn || 'raphael';
-      renderBoard(state.players || [], currentWhoseTurn);
-      renderPlayers(state.players || [], currentWhoseTurn);
+      lastPlayers = state.players || [];
+      renderBoard(lastPlayers, currentWhoseTurn);
+      renderPlayers(lastPlayers, currentWhoseTurn);
       renderEvents(state.feed || []);
       updateTurnIndicator(currentWhoseTurn);
-    } catch (error) {
-      console.warn('Unable to refresh game state:', error);
+    } catch (e) {
+      console.warn('Game state refresh failed:', e);
     }
   }
 
-  /* Dice animation */
   function animateDice(finalValue) {
     return new Promise(resolve => {
       const diceEl = document.getElementById('diceDisplay');
       if (!diceEl) { resolve(); return; }
-
-      const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-      diceEl.classList.add('dice-rolling');
+      const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
       diceEl.style.display = 'flex';
-
+      diceEl.classList.add('dice-rolling');
       let count = 0;
-      const interval = setInterval(() => {
+      const iv = setInterval(() => {
         diceEl.textContent = faces[Math.floor(Math.random() * 6)];
-        count++;
-        if (count >= 12) {
-          clearInterval(interval);
+        if (++count >= 12) {
+          clearInterval(iv);
           diceEl.textContent = faces[finalValue - 1];
           diceEl.classList.remove('dice-rolling');
           diceEl.classList.add('dice-landed');
-          setTimeout(() => {
-            diceEl.classList.remove('dice-landed');
-            resolve();
-          }, 1200);
+          setTimeout(() => { diceEl.classList.remove('dice-landed'); resolve(); }, 1100);
         }
       }, 80);
     });
@@ -184,14 +271,14 @@
   async function rollDice() {
     const user = getCurrentUser();
     const rollBtn = document.getElementById('rollDiceBtn');
-    if (rollBtn) { rollBtn.disabled = true; rollBtn.textContent = 'Rolling...'; }
+    if (rollBtn) { rollBtn.disabled = true; rollBtn.textContent = 'Rolling…'; }
 
     const result = await gamePost('/api/game/move', { user_id: user });
 
     if (result.error) {
       if (result.error === 'Not your turn') {
         const name = result.whose_turn === 'raphael' ? 'Raphael' : 'Taylor';
-        showToast("It's " + name + "'s turn!");
+        showToast(`It's ${name}'s turn!`);
       } else {
         showToast(result.error);
       }
@@ -199,16 +286,25 @@
       return;
     }
 
-    /* Animate the dice with the server-provided roll value */
     await animateDice(result.roll);
+    await refreshGameState();
+
+    // Determine where this player landed
+    const me = lastPlayers.find(p => p.user_id === user);
+    const pos = me ? Number(me.position) : -1;
 
     if (result.won) {
-      showToast('🏆 ' + (user === 'raphael' ? 'Raphael' : 'Taylor') + ' wins the round! +10 pts');
+      setTimeout(() => showVictory(user), 300);
+    } else if (pos === 5 || pos === 15) {
+      setTimeout(() => showCard(drawChallenge()), 500);
+    } else if (pos === 9 || pos === 17) {
+      setTimeout(() => showCard(drawHazard()), 400);
+    } else if (pos === 10) {
+      setTimeout(() => showCard(drawRest()), 400);
     } else if (result.bonus_note) {
       showToast(result.bonus_note.trim());
     }
 
-    await refreshGameState();
     if (rollBtn) { rollBtn.textContent = '🎲 Roll Dice'; }
   }
 
@@ -220,21 +316,20 @@
     toast.textContent = msg;
     const section = document.getElementById('gameSection');
     if (section) section.appendChild(toast);
-    setTimeout(() => { toast.classList.add('toast-visible'); }, 10);
+    requestAnimationFrame(() => toast.classList.add('toast-visible'));
     setTimeout(() => {
       toast.classList.remove('toast-visible');
       setTimeout(() => toast.remove(), 300);
-    }, 2500);
+    }, 2600);
   }
 
   function wireUi() {
-    const rollBtn = document.getElementById('rollDiceBtn');
-    if (rollBtn) rollBtn.addEventListener('click', rollDice);
+    const btn = document.getElementById('rollDiceBtn');
+    if (btn) btn.addEventListener('click', rollDice);
   }
 
-  /* Re-evaluate turn when user switches */
   const origSelectUser = window.selectUser;
-  window.selectUser = function(u) {
+  window.selectUser = function (u) {
     if (origSelectUser) origSelectUser(u);
     setTimeout(() => updateTurnIndicator(currentWhoseTurn), 50);
   };

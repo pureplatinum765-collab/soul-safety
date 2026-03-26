@@ -6,6 +6,10 @@
   margin: 1rem auto;
 }
 
+.game-section__inner {
+  position: relative;
+}
+
 .curiosity-shop__inner,
 .milanote-section__inner,
 .game-section__inner {

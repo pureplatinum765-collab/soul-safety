@@ -25,6 +25,8 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./minigames.css">
+  <!-- Entrance animation (runs before DOMContentLoaded) -->
+  <script src="./intro.js" defer></script>
 
   <!-- Favicon (inline SVG) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c2623a'/><path d='M16 8c-3 0-5.5 2-6 5-.5 3 1 5 3 6.5S16 22 16 24c0-2 2.5-3 3-4.5s3.5-3.5 3-6.5c-.5-3-3-5-6-5z' fill='%23faf6ef'/></svg>" type="image/svg+xml">
@@ -161,6 +163,17 @@
         <button class="curiosity-card" type="button" data-minigame-launch="lucky-word">🍀 Lucky Word</button>
       </div>
       <div class="challenge-banner" id="challengeBanner" hidden></div>
+    </div>
+  </section>
+
+  <!-- MEMORY GARDEN — photos bloom in over time -->
+  <section class="photo-garden" id="photoGarden">
+    <div class="photo-garden__inner vine-border">
+      <div class="feed-label">Memory Garden</div>
+      <p class="photo-garden__desc">Photos from your feed bloom here over time.</p>
+      <div class="photo-garden__grid" id="photoGardenGrid">
+        <!-- Spots populated by JS -->
+      </div>
     </div>
   </section>
 
@@ -419,6 +432,66 @@
   <script src="./app.js"></script>
   <script src="./game.js"></script>
   <script src="./minigames.js"></script>
+  <script src="./ambient.js"></script>
+  <script>
+  // Photo Garden — populate bloom spots from shared feed
+  (function () {
+    const SPOT_COUNT = 12;
+    function initGarden() {
+      const grid = document.getElementById('photoGardenGrid');
+      if (!grid) return;
+      // Create empty spots
+      for (let i = 0; i < SPOT_COUNT; i++) {
+        const s = document.createElement('div');
+        s.className = 'pg-spot';
+        s.dataset.idx = i;
+        grid.appendChild(s);
+      }
+    }
+
+    async function loadPhotos() {
+      const tok = window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken');
+      if (!tok) return;
+      try {
+        const r = await fetch('/api/messages', { headers: { Authorization: 'Bearer ' + tok } });
+        if (!r.ok) return;
+        const msgs = await r.json();
+        const photos = (msgs.messages || msgs || []).filter(m => m.type === 'photo' && m.id);
+        if (!photos.length) return;
+        const spots = document.querySelectorAll('.pg-spot');
+        const shuffled = photos.sort(() => Math.random() - 0.5);
+        shuffled.forEach((msg, i) => {
+          if (i >= spots.length) return;
+          const spot = spots[i];
+          // Stagger the bloom reveal
+          setTimeout(() => {
+            const img = document.createElement('img');
+            img.alt = 'Shared memory';
+            img.loading = 'lazy';
+            img.src = '/api/messages/' + msg.id + '/media';
+            img.onload = () => {
+              spot.classList.add('has-photo');
+              spot.appendChild(img);
+              requestAnimationFrame(() => {
+                spot.classList.add('pg-spot-bloom');
+                setTimeout(() => { spot.classList.add('bloomed'); img.style.opacity = '1'; }, 50);
+              });
+            };
+          }, i * 600 + Math.random() * 400);
+        });
+      } catch (_) {}
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initGarden();
+      // Load after auth
+      if (window.authToken || window.SOUL_SAFETY_BEARER_TOKEN || localStorage.getItem('soulSafetyBearerToken')) {
+        setTimeout(loadPhotos, 1800);
+      }
+      window.addEventListener('soulSafetyUnlocked', () => setTimeout(loadPhotos, 1200));
+    });
+  })();
+  </script>
   <script>
     // Register service worker for PWA
     if ('serviceWorker' in navigator) {
