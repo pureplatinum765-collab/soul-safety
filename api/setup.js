@@ -1,24 +1,23 @@
-import { supabase } from '../lib/db.js';
-import { CORS_HEADERS } from '../lib/cors.js';
+import { cors } from '../lib/cors.js';
+import { getSupabase } from '../lib/db.js';
+import { json } from '../lib/helpers.js';
 
 // One-time setup endpoint - creates all tables via Supabase RPC
 // Call POST /api/setup with the bearer token to initialize the database
 export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    return res.status(204).set(CORS_HEADERS).end();
-  }
+  if (cors(req, res)) return;
 
   // Require bearer token for security
   const auth = req.headers.authorization || '';
   const token = auth.replace(/^Bearer\s+/i, '').trim();
   const configured = (process.env.API_BEARER_TOKEN || '').split(',').map(v => v.trim()).filter(Boolean);
   if (!configured.includes(token)) {
-    return res.status(401).set(CORS_HEADERS).json({ error: 'Unauthorized' });
+    return json(res, 401, { error: 'Unauthorized' });
   }
 
   try {
-    // Use Supabase's SQL execution via the REST API
-    // We'll create tables one by one using supabase-js rpc or direct SQL
+    const supabase = getSupabase();
+
     const tables = [
       `CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
@@ -155,8 +154,8 @@ export default async function handler(req, res) {
 
     results.push({ action: 'seed_users', status: seedError ? seedError.message : 'ok' });
 
-    res.status(200).set(CORS_HEADERS).json({ results });
+    return json(res, 200, { results });
   } catch (err) {
-    res.status(500).set(CORS_HEADERS).json({ error: err.message });
+    return json(res, 500, { error: err.message });
   }
 }
