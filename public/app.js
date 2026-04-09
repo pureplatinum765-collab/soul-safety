@@ -164,30 +164,252 @@ function initScrollTopButton() {
 }
 
 function initMascotWidget() {
-  const mascotButton = document.getElementById('mascotButton');
-  const bubble = document.getElementById('mascotBubble');
-  const response = document.getElementById('mascotResponse');
-  const actions = document.getElementById('mascotActions');
-  if (!mascotButton || !bubble || !response || !actions) return;
+  initPenguinCompanion();
+}
 
-  mascotButton.addEventListener('click', () => {
-    const isHidden = bubble.hasAttribute('hidden');
-    if (isHidden) bubble.removeAttribute('hidden');
-    else bubble.setAttribute('hidden', '');
-  });
+// ===== PEBBLE THE PENGUIN COMPANION =====
+function initPenguinCompanion() {
+  const widget   = document.getElementById('penguinWidget');
+  const btn      = document.getElementById('penguinBtn');
+  const panel    = document.getElementById('penguinPanel');
+  const closeBtn = document.getElementById('penguinClose');
+  const messages = document.getElementById('penguinMessages');
+  const input    = document.getElementById('penguinInput');
+  const sendBtn  = document.getElementById('penguinSend');
+  const sugBox   = document.getElementById('penguinSuggestions');
+  const badge    = document.getElementById('penguinBadge');
 
-  actions.addEventListener('click', (event) => {
-    const target = event.target.closest('[data-mascot-person]');
-    if (!target) return;
+  if (!btn || !panel) return;
 
-    const person = target.getAttribute('data-mascot-person');
-    if (person === 'taylor') {
-      response.textContent = "Hey Tay! Hope you're having an amazing day. You're the best thing that ever happened to this site.";
+  let isOpen    = false;
+  let userName  = null;
+  let hasGreeted = false;
+
+  // ── Persona responses ──
+  const personas = {
+    raphael: {
+      greet: ["Hey Raph! 🐧 It's Pebble. I've been waddling around waiting for you.", "Raphael! Your personal soul safety penguin is here. What's on your mind?", "Raph! Big energy today. Let's talk. I'm all flippers."],
+      hype: ["You're building something real, bro. Keep going.", "The world genuinely needs what you're creating. No cap.", "Raph — your vibe literally makes this space what it is.", "Every great thing started with someone like you just showing up. You're showing up."],
+      checkin: ["Real talk — how are you actually doing?", "Energy check: 1-10, where you at today?", "Drop a mood. I'll match it. 🐧"],
+      fun: ["If penguins could build apps, they'd build this one.", "I tried to learn to code once. Fell off my ice block. Twice.", "Technically I'm a very advanced bird. Just saying."]
+    },
+    taylor: {
+      greet: ["Hey Taylor! 🐧 Pebble here! I was hoping you'd show up today.", "Tay! Your penguin companion has arrived. Ready to chat?", "Taylor! I've been practicing my waddle dance for you. It's impressive."],
+      hype: ["You bring something irreplaceable to this space. Seriously.", "Tay — your presence here makes everything warmer. Not even a little exaggerating.", "The care you bring to this friendship is next level.", "You're literally the reason this place has a heart."],
+      checkin: ["Checking in — how's your world today?", "Give me a vibe check. I'm a very emotionally intelligent penguin.", "What's living in your head rent-free today?"],
+      fun: ["I once tried surfing. Penguins don't surf. I do now.", "Fun fact: I speak fluent warmth. It's my first language.", "My hobbies include: caring deeply, napping on icebergs, and this."]
+    }
+  };
+
+  const genericReplies = [
+    "That's real. I'm here for all of it. 🐧",
+    "I hear you. Keep going — you're doing great.",
+    "Noted. You're doing better than you think.",
+    "I feel that. This space is yours, no judgment ever.",
+    "Waddling over to give you a virtual hug right now. 🤗",
+    "Sometimes just saying it out loud helps. Glad you said it.",
+    "You matter to this little penguin a lot. Just so you know.",
+    "That's what Soul Safety is for. You're in the right place.",
+    "Deep breath. You've got this. I've got flippers crossed for you. 🐧",
+    "Every feeling is valid here. This is a judgment-free iceberg."
+  ];
+
+  const greetSuggestions = {
+    raphael: ["How's the site?", "I need a pep talk", "Tell me something fun", "Check in with Taylor"],
+    taylor:  ["How's Raphael?", "I need encouragement", "Tell me something fun", "What's on the site?"],
+    default: ["I'm Raphael", "I'm Taylor", "Just exploring", "Surprise me!"]
+  };
+
+  const contextSuggestions = ["I'm doing great!", "Could be better", "Tell me something fun", "How's the site?", "I need encouragement"];
+
+  // ── Helpers ──
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function addMsg(text, from = 'bot', delay = 0) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const msg = document.createElement('div');
+        msg.className = `penguin-msg penguin-msg--${from}`;
+
+        if (from === 'bot') {
+          const av = document.createElement('div');
+          av.className = 'penguin-msg-avatar';
+          av.innerHTML = `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="13" rx="9" ry="8" fill="#1a1a2e"/><ellipse cx="20" cy="15" rx="5.5" ry="5" fill="#f5f0e8"/><circle cx="17.5" cy="12.5" r="2.2" fill="white"/><circle cx="22.5" cy="12.5" r="2.2" fill="white"/><circle cx="17.8" cy="12.8" r="1.1" fill="#1a1a2e"/><circle cx="22.8" cy="12.8" r="1.1" fill="#1a1a2e"/><ellipse cx="20" cy="17" rx="2.2" ry="1.4" fill="#c2623a"/></svg>`;
+          msg.appendChild(av);
+        }
+
+        const bubble = document.createElement('div');
+        bubble.className = 'penguin-bubble';
+        bubble.textContent = text;
+        msg.appendChild(bubble);
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+        resolve();
+      }, delay);
+    });
+  }
+
+  function showTyping() {
+    const el = document.createElement('div');
+    el.className = 'penguin-msg penguin-msg--bot';
+    el.id = 'penguinTyping';
+    const av = document.createElement('div');
+    av.className = 'penguin-msg-avatar';
+    av.innerHTML = `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="13" rx="9" ry="8" fill="#1a1a2e"/><ellipse cx="20" cy="15" rx="5.5" ry="5" fill="#f5f0e8"/><circle cx="17.5" cy="12.5" r="2.2" fill="white"/><circle cx="22.5" cy="12.5" r="2.2" fill="white"/><circle cx="17.8" cy="12.8" r="1.1" fill="#1a1a2e"/><circle cx="22.8" cy="12.8" r="1.1" fill="#1a1a2e"/><ellipse cx="20" cy="17" rx="2.2" ry="1.4" fill="#c2623a"/></svg>`;
+    const b = document.createElement('div');
+    b.className = 'penguin-bubble';
+    b.innerHTML = `<div class="penguin-typing-dots"><span></span><span></span><span></span></div>`;
+    el.appendChild(av);
+    el.appendChild(b);
+    messages.appendChild(el);
+    messages.scrollTop = messages.scrollHeight;
+    return el;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('penguinTyping');
+    if (el) el.remove();
+  }
+
+  function setSuggestions(chips) {
+    sugBox.innerHTML = '';
+    chips.forEach(label => {
+      const chip = document.createElement('button');
+      chip.className = 'penguin-chip';
+      chip.type = 'button';
+      chip.textContent = label;
+      chip.addEventListener('click', () => handleUserMsg(label));
+      sugBox.appendChild(chip);
+    });
+  }
+
+  function respondToUser(text) {
+    const t = text.toLowerCase();
+    const p = personas[userName];
+
+    showTyping();
+    let reply = '';
+    let nextSuggs = contextSuggestions;
+
+    // Person identification
+    if (!userName && (t.includes('raphael') || t.includes('raph'))) {
+      removeTyping();
+      userName = 'raphael';
+      addMsg(pick(personas.raphael.greet));
+      setSuggestions(greetSuggestions.raphael);
+      return;
+    }
+    if (!userName && (t.includes('taylor') || t.includes('tay'))) {
+      removeTyping();
+      userName = 'taylor';
+      addMsg(pick(personas.taylor.greet));
+      setSuggestions(greetSuggestions.taylor);
       return;
     }
 
-    response.textContent = "Raph! Keep going brother. The world needs what you're building. Proud of you.";
+    // Site questions
+    if (t.includes('site') || t.includes('game') || t.includes('board') || t.includes('3d')) {
+      reply = "The board game is 3D now — like Mario Party! You and " + (userName === 'raphael' ? 'Taylor' : 'Raphael') + " can play together in real time. Roll dice, hit special tiles, earn points. It's genuinely good. 🎮";
+      nextSuggs = ["How do I play?", "What else is on here?", "Tell me something fun"];
+    } else if (t.includes('how do i play') || t.includes('how to play')) {
+      reply = "You both log in, go to the board game section, and take turns rolling! It alternates automatically — Raphael goes first. Land on special tiles for bonuses or penalties. First to the end wins the round. 🏆";
+    } else if (t.includes('message') || t.includes('chat') || t.includes('send')) {
+      reply = "The message feed is the heart of this place. Text, voice notes, photos, videos — all flowing between you two in real time. Plus reactions, typing indicators, the whole thing. 💬";
+    } else if (t.includes('pep talk') || t.includes('encouragement') || t.includes('motivation') || t.includes('better')) {
+      reply = p ? pick(p.hype) : pick(genericReplies);
+      nextSuggs = ["Thank you 🙏", "Tell me more", "I needed that", "Tell me something fun"];
+    } else if (t.includes('fun') || t.includes('joke') || t.includes('something fun')) {
+      reply = p ? pick(p.fun) : "Fun fact: I am literally a penguin bot named Pebble. Life is wild and beautiful. 🐧";
+    } else if (t.includes('check in') || t.includes('doing') || t.includes('how are')) {
+      reply = p ? pick(p.checkin) : "Real talk — how are you actually doing today?";
+      nextSuggs = ["I'm doing great!", "Could be better", "Pretty good actually", "It's complicated"];
+    } else if (t.includes('great') || t.includes('good') || t.includes('amazing') || t.includes('awesome')) {
+      reply = p ? pick(p.hype) + " Love that energy! Keep it going. 🐧" : "YES! That energy is everything. Keep it going!";
+    } else if (t.includes('could be better') || t.includes('not great') || t.includes('bad') || t.includes('rough')) {
+      reply = "I hear you. This space exists exactly for these moments. You don't have to be okay. You just have to be here. 🐧";
+      nextSuggs = ["Thanks Pebble", "Tell me something fun", "I need a pep talk"];
+    } else if (t.includes('taylor') && userName === 'raphael') {
+      reply = "Taylor is the reason this place has warmth. You two have something really special going here. 🤝";
+    } else if (t.includes('raphael') && userName === 'taylor') {
+      reply = "Raphael is out here building something that matters. And you're part of why. 💙";
+    } else if (t.includes('surprise') || t.includes('surprise me')) {
+      const surprises = [
+        "Did you know Soul Safety has a living canvas that blooms when you arrive? 🌸 Look at the background!",
+        "There's a daily spark feature — a quote or prompt just for you and your friend, every day.",
+        "The board game has special tiles — some boost you forward, some slide you back. Strategy matters! 🎲",
+        "There are mini-games you can challenge each other to: Pong, Rock Paper Scissors, and more.",
+        "This whole site was built with love. Like, a lot of love. You can feel it if you look closely. 💛"
+      ];
+      reply = pick(surprises);
+    } else if (t.includes('who are you') || t.includes('what are you') || t.includes('pebble')) {
+      reply = "I'm Pebble — your personal Soul Safety penguin companion. I'm part guide, part cheerleader, part emotionally intelligent bird. I know this site inside out and I'm here whenever you need me. 🐧";
+    } else if (t.includes('thank')) {
+      reply = p ? "Always. That's what I'm here for. 🐧" : "Anytime. Genuinely. 🐧";
+    } else {
+      reply = pick(genericReplies);
+    }
+
+    setTimeout(() => {
+      removeTyping();
+      addMsg(reply);
+      setSuggestions(nextSuggs);
+    }, 800 + Math.random() * 400);
+  }
+
+  function handleUserMsg(text) {
+    if (!text.trim()) return;
+    addMsg(text, 'user');
+    input.value = '';
+    setSuggestions([]);
+    respondToUser(text);
+  }
+
+  // ── Open/close ──
+  function openPanel() {
+    isOpen = true;
+    panel.removeAttribute('hidden');
+    badge.setAttribute('hidden', '');
+    input.focus();
+
+    if (!hasGreeted) {
+      hasGreeted = true;
+      // Try to detect user from localStorage
+      const storedUser = localStorage.getItem('soulSafetyUser') || '';
+      if (storedUser.toLowerCase().includes('raphael')) {
+        userName = 'raphael';
+        addMsg(pick(personas.raphael.greet), 'bot', 300);
+        setTimeout(() => setSuggestions(greetSuggestions.raphael), 800);
+      } else if (storedUser.toLowerCase().includes('taylor')) {
+        userName = 'taylor';
+        addMsg(pick(personas.taylor.greet), 'bot', 300);
+        setTimeout(() => setSuggestions(greetSuggestions.taylor), 800);
+      } else {
+        addMsg("Hi there! I'm Pebble 🐧 — your Soul Safety companion. Who am I talking to?", 'bot', 300);
+        setTimeout(() => setSuggestions(greetSuggestions.default), 800);
+      }
+    }
+  }
+
+  function closePanel() {
+    isOpen = false;
+    panel.setAttribute('hidden', '');
+  }
+
+  btn.addEventListener('click', () => isOpen ? closePanel() : openPanel());
+  closeBtn.addEventListener('click', closePanel);
+
+  sendBtn.addEventListener('click', () => handleUserMsg(input.value.trim()));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleUserMsg(input.value.trim()); }
   });
+
+  // Show badge after a delay to hint at interaction
+  setTimeout(() => {
+    if (!isOpen) badge.removeAttribute('hidden');
+  }, 4000);
+
+  // Expose for external use (e.g. auth sets the user)
+  window.setPenguinUser = (name) => { userName = name?.toLowerCase(); };
 }
 
 // ===== API HELPERS =====
@@ -395,6 +617,9 @@ function initSparkles() {
 function selectUser(userId, lockSelection = false) {
   currentUser = userId;
   window.currentUser = userId;
+  // Wire penguin companion to know who the user is
+  if (typeof window.setPenguinUser === 'function') window.setPenguinUser(userId);
+  localStorage.setItem('soulSafetyUser', userId || '');
   document.querySelectorAll('.user-option').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.user === userId);
     if (lockSelection && userId && btn.dataset.user !== userId) {
