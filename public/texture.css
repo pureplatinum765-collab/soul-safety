@@ -1,13 +1,15 @@
-/* texture.css — Soul Safety
-   Analogue warmth: grain overlay + hero radial.
-   Shadows and border-radius are owned by style.css now — no overrides here.
-   -----------------------------------------------------------------------  */
+/**
+ * texture.css — Matte, analog feel
+ * Design direction: trevorhallmusic.com — no gloss, no shimmer, no box-shadows.
+ * Paper-like grain, sharp corners, warm surfaces.
+ */
 
-/* ─── Paper Grain Overlay ─────────────────────────────────────────────────
- * Fractal noise via SVG feTurbulence, tiled at 256 × 256 px.
- * Sits above page content but below any pin gate / popups (z-index 9990).
- * pointer-events: none so it never intercepts clicks.
- * ─────────────────────────────────────────────────────────────────────── */
+/* ─── Paper Grain Overlay ──────────────────────────────────────────────────── */
+/*
+ * Subtle fractal noise applied as a fixed pseudo-element above all content.
+ * The SVG feTurbulence generates film-grain-style noise tiled at 256px.
+ * z-index sits below pin gate (9999) and bloom (10000) but above page content.
+ */
 body::after {
   content: '';
   position: fixed;
@@ -21,27 +23,124 @@ body::after {
 }
 
 [data-theme="dark"] body::after {
-  opacity: 0.07;
+  opacity: 0.06;
   mix-blend-mode: soft-light;
 }
 
-/* ─── Hero Radial Warmth ──────────────────────────────────────────────────
- * Soft dual-radial gradient layered over the hero bg.
- * Applied via a dedicated class so it degrades gracefully.
- * ─────────────────────────────────────────────────────────────────────── */
-.hero-bg--gradient {
-  background:
-    radial-gradient(ellipse at 28% 42%, rgba(197, 92, 52, 0.26) 0%, transparent 52%),
-    radial-gradient(ellipse at 72% 30%, rgba(139, 115, 85, 0.18) 0%, transparent 48%),
-    radial-gradient(ellipse at 52% 78%, rgba(95, 140, 85, 0.14) 0%, transparent 48%),
-    linear-gradient(135deg, #3d2314 0%, #1a0f09 45%, #0d1a0d 100%);
-  background-size: 200% 200%;
-  animation: heroShift 18s ease-in-out infinite;
+/* ─── Matte Card Base ──────────────────────────────────────────────────────── */
+/*
+ * Replaces glossy card styles with flat, paper-like surfaces.
+ * Sharp 2px corner radius gives an analog, printed-matter feel.
+ */
+.matte-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 2px; /* Sharp, analog corners */
+  box-shadow: none !important;
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* ─── Hero — Remove Glossy Gradients ──────────────────────────────────────── */
+.hero {
+  background: var(--color-bg);
+}
+
+.hero-bg--gradient {
+  background: radial-gradient(
+      ellipse at 30% 40%,
+      oklch(from var(--color-primary) l c h / 0.06) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse at 70% 60%,
+      oklch(from var(--color-sage) l c h / 0.04) 0%,
+      transparent 60%
+    );
+}
+
+/* Fallback for browsers without oklch from() support */
+@supports not (color: oklch(from red l c h)) {
   .hero-bg--gradient {
-    animation: none;
-    background-size: 100% 100%;
+    background: radial-gradient(ellipse at 30% 40%, rgba(194, 98, 58, 0.06) 0%, transparent 70%),
+                radial-gradient(ellipse at 70% 60%, rgba(107, 142, 95, 0.04) 0%, transparent 60%);
   }
+}
+
+.hero-overlay {
+  background: none;
+}
+
+/* ─── Remove All Box-Shadows ──────────────────────────────────────────────── */
+.pin-gate-card,
+.mood-card,
+.feed-section,
+.curiosity-card,
+.spark-popup-card,
+.minigame-modal,
+.daily-spark-inline,
+.mascot-bubble {
+  box-shadow: none !important;
+  border-radius: 2px;
+}
+
+/* ─── Remove Disco Shimmer Bar ────────────────────────────────────────────── */
+.disco-shimmer {
+  display: none;
+}
+
+/* ─── Remove Hero Title Shimmer — Solid Color Instead ─────────────────────── */
+.shimmer-text {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: var(--color-text) !important;
+  color: var(--color-text);
+  animation: none !important;
+}
+
+/* ─── Global Border-Radius Normalisation — Analog/Paper Feel ──────────────── */
+/*
+ * Override rounded/pill radii throughout the UI.
+ * Keeps things feeling handmade rather than bubbly/app-like.
+ */
+.mood-card,
+.feed-section,
+.curiosity-card,
+.curiosity-shop__inner,
+.milanote-section__inner,
+.daily-spark-inline,
+.spark-popup-card,
+.minigame-modal,
+.mascot-bubble,
+.mascot-button,
+.input-bar-inner,
+.connection-status {
+  border-radius: 2px !important;
+}
+
+/* Slightly more generous on interactive buttons — still tight */
+.btn,
+.btn-enter,
+.btn-game,
+.send-btn,
+.install-btn,
+.mood-emoji-btn,
+.pinboard-link,
+.scroll-top-btn {
+  border-radius: 3px !important;
+}
+
+/* Pin gate input & button stay slightly rounded for usability */
+.pin-gate-row input,
+.pin-gate-row button {
+  border-radius: 4px !important;
+}
+
+/* Pin gate card itself — sharp */
+.pin-gate-card {
+  border-radius: 2px !important;
+}
+
+/* ─── Remove Vine-Border Glow/Shadow if Any ───────────────────────────────── */
+.vine-border {
+  box-shadow: none !important;
 }
