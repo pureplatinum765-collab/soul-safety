@@ -20,6 +20,12 @@
   <!-- Fonts -->
   <link href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,600,700&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
 
+  <!-- Three.js (UMD — exposes window.THREE) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.min.js"></script>
+
+  <!-- Supabase JS SDK (UMD — exposes window.supabase_js) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="./base.css">
   <link rel="stylesheet" href="./style.css">
@@ -474,6 +480,31 @@
       document.getElementById('pinGateInput').focus();
     }
   </script>
+  <!-- Initialize Supabase client for real-time features -->
+  <script>
+    (async function initSupabase() {
+      try {
+        // supabase-js v2 UMD loads as window.supabase (module namespace);
+        // grab createClient BEFORE we overwrite window.supabase with the client instance.
+        const createClient = (window.supabase && window.supabase.createClient)
+          || (window.Supabase && window.Supabase.createClient);
+        if (!createClient) { console.warn('Supabase SDK not loaded'); return; }
+
+        const res = await fetch('/api/client-config');
+        if (!res.ok) return;
+        const { supabaseUrl, supabaseAnonKey } = await res.json();
+        if (!supabaseUrl || !supabaseAnonKey) return;
+
+        // Replace module reference with live client instance
+        window.supabase = createClient(supabaseUrl, supabaseAnonKey);
+        window.dispatchEvent(new Event('supabaseReady'));
+        console.log('[Soul Safety] Supabase real-time ready');
+      } catch(e) {
+        console.warn('[Soul Safety] Supabase init failed:', e);
+      }
+    })();
+  </script>
+
   <script src="./bloom.js"></script>
   <script src="./living-canvas.js"></script>
   <script src="./app.js"></script>
