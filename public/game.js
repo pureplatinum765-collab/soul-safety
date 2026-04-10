@@ -74,7 +74,7 @@
   /* ── 2. API ───────────────────────────────────────────── */
   function gameGet() {
     var token = window.authToken || (typeof localStorage !== 'undefined' && localStorage.getItem('soulSafetyBearerToken')) || '';
-    return fetch('/api/game-state', {
+    return fetch('/api/game/state', {
       headers: token ? { Authorization: 'Bearer ' + token } : {},
       credentials: 'include',
     }).then(function (r) { return r.json(); });
@@ -970,7 +970,7 @@
         gameState.rolling = true;
         setRollBtnEnabled(false);
 
-        gamePost('roll', { userId: curUser }).then(function (data) {
+        gamePost('game/move', { user_id: curUser }).then(function (data) {
           gameState.rolling = false;
           var roll = (data && data.roll) ? data.roll : Math.floor(Math.random() * 6) + 1;
           startDiceRoll(roll);
@@ -987,7 +987,7 @@
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
         if (isAnimating) return;
-        gamePost('reset', {}).then(function (data) {
+        gamePost('game/move', { user_id: 'raphael', reset: true }).then(function (data) {
           gameState.raphael   = { pos: 0, pts: 0 };
           gameState.taylor    = { pos: 0, pts: 0 };
           gameState.currentTurn = 'raphael';
@@ -1029,27 +1029,8 @@
       });
     }
 
-    /* ── 23. DEBUG OVERLAY ──────────────────────────── */
-    var debugEl = document.createElement('div');
-    debugEl.style.cssText = 'position:fixed;top:0;right:0;z-index:99999;background:rgba(0,0,0,.75);color:#0f0;font:11px/1.5 monospace;padding:4px 8px;pointer-events:none;white-space:pre;';
-    document.body.appendChild(debugEl);
-    var dbgFrames = 0, dbgLast = performance.now(), dbgFT = 0, dbgPrev = performance.now();
-
-    function updateDebug(renderer) {
-      var now = performance.now();
-      dbgFT = now - dbgPrev;
-      dbgPrev = now;
-      dbgFrames++;
-      if (now - dbgLast >= 1000) {
-        var fps  = (dbgFrames * 1000) / (now - dbgLast);
-        var info = renderer.info;
-        var lines = ['FPS:' + fps.toFixed(0) + ' FT:' + dbgFT.toFixed(1) + 'ms'];
-        if (info) lines.push('Draw:' + info.render.calls + ' Tri:' + info.render.triangles);
-        debugEl.textContent = lines.join('\n');
-        dbgFrames = 0;
-        dbgLast = now;
-      }
-    }
+    /* ── 23. DEBUG OVERLAY (removed for production) ── */
+    function updateDebug() { /* no-op in production */ }
 
     /* ── 24. ANIMATION LOOP ─────────────────────────── */
     var rafId = null;

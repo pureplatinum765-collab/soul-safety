@@ -34,11 +34,18 @@ export default async function handler(req, res) {
       const feed = (feedRes.data || []).map((e) => ({ ...e, timestamp: e.created_at }));
       const lastMove = lastMoveRes.data;
       const whose_turn = !lastMove ? "raphael" : (lastMove.user_id === "raphael" ? "taylor" : "raphael");
-      if (auth.userId) {
-        const me = players.find((p) => p.user_id === auth.userId) || null;
-        return json(res, 200, { me, players, feed, whose_turn, board_size: BOARD_SIZE });
-      }
-      return json(res, 200, { players, feed, whose_turn, board_size: BOARD_SIZE });
+      const rp = players.find(p => p.user_id === "raphael") || { position: 0, points: 0 };
+      const tp = players.find(p => p.user_id === "taylor")  || { position: 0, points: 0 };
+      const me = auth.userId ? players.find(p => p.user_id === auth.userId) || null : null;
+      return json(res, 200, {
+        me, players, feed, whose_turn, board_size: BOARD_SIZE,
+        raphael: Number(rp.position),
+        taylor: Number(tp.position),
+        raphaelPts: Number(rp.points),
+        taylorPts: Number(tp.points),
+        currentTurn: whose_turn,
+        winner: null
+      });
     }
 
     // POST /api/game/move
@@ -49,6 +56,15 @@ export default async function handler(req, res) {
 
       await ensureGamePlayer(actingUserId);
       const db = getSupabase();
+
+      // Handle reset
+      if (body?.reset) {
+        await Promise.all([
+          db.from("game_players").update({ position: 0, updated_at: nowTs() }).eq("user_id", "raphael"),
+          db.from("game_players").update({ position: 0, updated_at: nowTs() }).eq("user_id", "taylor")
+        ]);
+        return json(res, 200, { raphael: 0, taylor: 0, raphaelPts: 0, taylorPts: 0, currentTurn: "raphael", winner: null });
+      }
 
       const { data: lastMove } = await db.from("game_events").select("user_id").eq("event_type", "moved").order("created_at", { ascending: false }).limit(1).maybeSingle();
       const expectedTurn = !lastMove ? "raphael" : (lastMove.user_id === "raphael" ? "taylor" : "raphael");
@@ -94,7 +110,27 @@ export default async function handler(req, res) {
       }
 
       const nextTurn = actingUserId === "raphael" ? "taylor" : "raphael";
-      return json(res, 200, { user_id: actingUserId, roll, position: won ? 0 : newPos, points: won ? Number(player.points) + 10 : Number(player.points), won, bonus_note: bonusNote, next_turn: nextTurn, note });
+
+      // Fetch both players for full state
+      const { data: allPlayers } = await db.from("game_players").select("user_id, position, points");
+      const rp = (allPlayers || []).find(p => p.user_id === "raphael") || { position: 0, points: 0 };
+      const tp = (allPlayers || []).find(p => p.user_id === "taylor")  || { position: 0, points: 0 };
+
+      return json(res, 200, {
+        roll,
+        user_id: actingUserId,
+        raphael: Number(rp.position),
+        taylor: Number(tp.position),
+        raphaelPts: Number(rp.points),
+        taylorPts: Number(tp.points),
+        currentTurn: nextTurn,
+        winner: won ? actingUserId : null,
+        position: won ? 0 : newPos,
+        points: won ? Number(player.points) + 10 : Number(player.points),
+        won,
+        bonus_note: bonusNote,
+        note
+      });
     }
 
     // GET /api/game/tasks

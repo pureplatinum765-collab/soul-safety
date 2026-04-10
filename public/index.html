@@ -55,8 +55,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(17, 10, 7, 0.92);
-      backdrop-filter: blur(6px);
+      background: #0a0705;
+      backdrop-filter: blur(24px);
       padding: 1rem;
     }
 
@@ -394,15 +394,16 @@
       </div>
     </div>
 
-    <!-- Minigame overlay -->
-    <div class="minigame-overlay" id="minigameOverlay" hidden>
-      <div class="minigame-modal">
-        <button class="minigame-close" type="button" data-minigame-close aria-label="Close" onclick="window.closeMinigameModal && window.closeMinigameModal()">×</button>
-        <h3 id="minigameTitle">Minigame Challenge</h3>
-        <div id="minigameContent"></div>
-      </div>
-    </div>
   </section>
+
+  <!-- Minigame overlay (must be direct child of body to avoid containing block issues) -->
+  <div class="minigame-overlay" id="minigameOverlay" hidden>
+    <div class="minigame-modal">
+      <button class="minigame-close" type="button" data-minigame-close aria-label="Close" onclick="window.closeMinigameModal && window.closeMinigameModal()">×</button>
+      <h3 id="minigameTitle">Minigame Challenge</h3>
+      <div id="minigameContent"></div>
+    </div>
+  </div>
 
   <!-- INPUT BAR -->
   <div class="input-bar">

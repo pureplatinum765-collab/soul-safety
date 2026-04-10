@@ -527,7 +527,8 @@ body {
 
 .reveal-on-scroll.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
+  will-change: auto;
 }
 
 /* ============================================================
@@ -1261,6 +1262,10 @@ body {
   color: var(--color-text);
   margin-bottom: var(--space-4);
   animation: challengePulse 2.4s ease-in-out infinite;
+}
+
+.challenge-banner[hidden] {
+  display: none !important;
 }
 
 .challenge-banner[data-from="taylor"] {

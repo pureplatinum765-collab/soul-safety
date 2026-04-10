@@ -6,6 +6,7 @@
     { "source": "/api/auth/:path*", "destination": "/api/auth" },
     { "source": "/api/messages/:path*", "destination": "/api/messages" },
     { "source": "/api/game/:path*", "destination": "/api/game" },
+    { "source": "/api/challenges", "destination": "/api/challenge" },
     { "source": "/api/challenge/:path*", "destination": "/api/challenge" },
     { "source": "/api/daily-spark/:path*", "destination": "/api/daily-spark" },
     { "source": "/api/reactions/:path*", "destination": "/api/reactions" },

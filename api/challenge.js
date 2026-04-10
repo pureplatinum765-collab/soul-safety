@@ -19,6 +19,19 @@ export default async function handler(req, res) {
     const auth = await isAuthorized(req);
     if (!auth) return json(res, 401, { error: "Unauthorized" });
 
+    // GET /api/challenge(s) — list active challenges
+    if ((after === "" || after === "s") && req.method === "GET") {
+      const db = getSupabase();
+      const { data: challenges, error } = await db
+        .from("challenges")
+        .select("id, challenger, opponent, game, status, game_state, created_at")
+        .in("status", ["pending", "accepted", "active"])
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return json(res, 200, challenges || []);
+    }
+
     // POST /api/challenge — create
     if (after === "" && req.method === "POST") {
       const body = await safeJson(req);

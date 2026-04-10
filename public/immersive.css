@@ -53,7 +53,7 @@
 .ambient-canvas.visible { opacity: 1; }
 
 /* Make sure all real content sits above ambient layer */
-body > *:not(.ambient-canvas):not(.cursor-ring):not(.cursor-dot):not(.float-orb) {
+body > *:not(.ambient-canvas):not(.cursor-ring):not(.cursor-dot):not(.float-orb):not(.pin-gate-overlay):not(.minigame-overlay):not(#bloomOverlay) {
   position: relative;
   z-index: 1;
 }
@@ -291,7 +291,7 @@ h1, h2 {
   transform: translateY(20px);
   transition: opacity 0.65s var(--ease-out), transform 0.65s var(--ease-out);
 }
-.reveal.in-view { opacity: 1; transform: translateY(0); }
+.reveal.in-view { opacity: 1; transform: none; }
 .reveal:nth-child(2) { transition-delay: 0.07s; }
 .reveal:nth-child(3) { transition-delay: 0.14s; }
 .reveal:nth-child(4) { transition-delay: 0.21s; }
@@ -336,8 +336,9 @@ h1, h2 {
 
 /* ── PIN gate ── */
 .pin-gate-overlay {
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
+  background: #0a0705 !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
 }
 .pin-gate-card {
   box-shadow: var(--shadow-float), 0 0 100px rgba(212,105,62,0.12) !important;
