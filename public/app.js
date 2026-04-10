@@ -368,6 +368,7 @@ function initPenguinCompanion() {
   function openPanel() {
     isOpen = true;
     panel.removeAttribute('hidden');
+    requestAnimationFrame(() => panel.classList.add('is-open'));
     badge.setAttribute('hidden', '');
     input.focus();
 
@@ -392,8 +393,21 @@ function initPenguinCompanion() {
 
   function closePanel() {
     isOpen = false;
-    panel.setAttribute('hidden', '');
+    panel.classList.remove('is-open');
+    panel.addEventListener('transitionend', () => {
+      if (!isOpen) panel.setAttribute('hidden', '');
+    }, { once: true });
   }
+
+  // Click-away to close
+  document.addEventListener('click', (e) => {
+    if (isOpen && !widget.contains(e.target)) closePanel();
+  });
+
+  // ESC to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) closePanel();
+  });
 
   btn.addEventListener('click', () => isOpen ? closePanel() : openPanel());
   closeBtn.addEventListener('click', closePanel);
