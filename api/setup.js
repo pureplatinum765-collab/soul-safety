@@ -134,6 +134,13 @@ export default async function handler(req, res) {
         reflection_text TEXT NOT NULL,
         created_at BIGINT NOT NULL DEFAULT extract(epoch from now())::bigint,
         UNIQUE(spark_id, user_id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS factoids (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        user_id TEXT NOT NULL,
+        about TEXT,
+        text TEXT NOT NULL,
+        created_at BIGINT NOT NULL DEFAULT extract(epoch from now())::bigint
       )`
     ];
 

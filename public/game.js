@@ -140,10 +140,10 @@
     renderer.domElement.style.height  = '100%';
     canvasWrap.appendChild(renderer.domElement);
 
-    /* Scene */
+    /* Scene — deeper cosmic atmosphere */
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0520);
-    scene.fog = new THREE.FogExp2(0x0a0520, 0.028);
+    scene.background = new THREE.Color(0x060318);
+    scene.fog = new THREE.FogExp2(0x060318, 0.022);
 
     /* Camera */
     var aspect = canvasWrap.clientWidth / Math.max(canvasWrap.clientHeight, 1);
@@ -168,11 +168,20 @@
     dirLight.shadow.camera.bottom = -20;
     scene.add(dirLight);
 
-    var ambient = new THREE.AmbientLight(0x6080ff, 0.4);
+    var ambient = new THREE.AmbientLight(0x6080ff, 0.5);
     scene.add(ambient);
 
-    var hemi = new THREE.HemisphereLight(0x87ceeb, 0x4a7c59, 0.5);
+    var hemi = new THREE.HemisphereLight(0x87ceeb, 0x4a7c59, 0.55);
     scene.add(hemi);
+
+    /* Colored accent lights for atmosphere */
+    var purpleLight = new THREE.PointLight(0x6622aa, 0.6, 30);
+    purpleLight.position.set(-8, 10, -8);
+    scene.add(purpleLight);
+
+    var amberLight = new THREE.PointLight(0xff8844, 0.4, 25);
+    amberLight.position.set(8, 8, 5);
+    scene.add(amberLight);
 
     /* ── 5. TILE LABEL CANVAS TEXTURE ───────────────── */
     function makeTileLabel(num, special) {
@@ -391,34 +400,62 @@
 
     /* Starfield: floating star particles + nebula */
     var starPoints;
+    var dustParticles;
     (function buildStarfield() {
-      /* Nebula: large transparent sphere */
-      var nebulaMat  = new THREE.MeshPhongMaterial({ color: 0x4b0082, emissive: 0x220044, emissiveIntensity: 0.8, transparent: true, opacity: 0.18, side: THREE.BackSide });
-      var nebulaGeo  = new THREE.SphereGeometry(6, 16, 12);
+      /* Nebula: larger, more vibrant */
+      var nebulaMat  = new THREE.MeshPhongMaterial({ color: 0x5a0099, emissive: 0x330066, emissiveIntensity: 1.0, transparent: true, opacity: 0.22, side: THREE.BackSide });
+      var nebulaGeo  = new THREE.SphereGeometry(8, 20, 16);
       var nebulaMesh = new THREE.Mesh(nebulaGeo, nebulaMat);
-      nebulaMesh.position.set(-5.6, 2, -1);
+      nebulaMesh.position.set(-5.6, 3, -1);
       decoGroup.add(nebulaMesh);
 
-      /* Star particles */
-      var starCount = 180;
+      /* Second nebula — amber accent */
+      var nebula2Mat = new THREE.MeshPhongMaterial({ color: 0x663300, emissive: 0x442200, emissiveIntensity: 0.6, transparent: true, opacity: 0.12, side: THREE.BackSide });
+      var nebula2Geo = new THREE.SphereGeometry(6, 16, 12);
+      var nebula2Mesh = new THREE.Mesh(nebula2Geo, nebula2Mat);
+      nebula2Mesh.position.set(5, 4, -3);
+      decoGroup.add(nebula2Mesh);
+
+      /* Star particles — MORE stars, denser field */
+      var starCount = 350;
       var starGeo   = new THREE.BufferGeometry();
       var starPos   = new Float32Array(starCount * 3);
+      var starSizes = new Float32Array(starCount);
       for (var si = 0; si < starCount; si++) {
-        starPos[si * 3]     = -5.6 + (Math.random() - 0.5) * 12;
-        starPos[si * 3 + 1] = Math.random() * 8;
-        starPos[si * 3 + 2] = -4 + (Math.random() - 0.5) * 8;
+        starPos[si * 3]     = (Math.random() - 0.5) * 40;
+        starPos[si * 3 + 1] = Math.random() * 15;
+        starPos[si * 3 + 2] = (Math.random() - 0.5) * 40;
+        starSizes[si] = 0.03 + Math.random() * 0.1;
       }
       starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-      var starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08, sizeAttenuation: true, transparent: true, opacity: 0.85 });
+      var starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.09, sizeAttenuation: true, transparent: true, opacity: 0.9 });
       starPoints = new THREE.Points(starGeo, starMat);
       decoGroup.add(starPoints);
 
+      /* Ambient dust/firefly particles around the board */
+      var dustCount = 80;
+      var dustGeo = new THREE.BufferGeometry();
+      var dustPos = new Float32Array(dustCount * 3);
+      for (var di = 0; di < dustCount; di++) {
+        dustPos[di * 3]     = (Math.random() - 0.5) * 18;
+        dustPos[di * 3 + 1] = 0.3 + Math.random() * 6;
+        dustPos[di * 3 + 2] = (Math.random() - 0.5) * 18;
+      }
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+      var dustMat = new THREE.PointsMaterial({ color: 0xffcc66, size: 0.06, sizeAttenuation: true, transparent: true, opacity: 0.5 });
+      dustParticles = new THREE.Points(dustGeo, dustMat);
+      decoGroup.add(dustParticles);
+
       /* Floating tiny star spheres */
-      for (var fsi = 0; fsi < 12; fsi++) {
+      for (var fsi = 0; fsi < 18; fsi++) {
         var fStarGeo  = new THREE.SphereGeometry(0.07, 5, 5);
         var fStarMat  = new THREE.MeshPhongMaterial({ color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 1.0 });
         var fStarMesh = new THREE.Mesh(fStarGeo, fStarMat);
-        fStarMesh.position.set(-5.6 + (Math.random() - 0.5) * 5, 1 + Math.random() * 4, -3 + (Math.random() - 0.5) * 5);
+        fStarMesh.position.set(
+          (Math.random() - 0.5) * 16, 
+          0.5 + Math.random() * 5, 
+          (Math.random() - 0.5) * 16
+        );
         fStarMesh._floatPhase = Math.random() * Math.PI * 2;
         decoGroup.add(fStarMesh);
       }
@@ -1094,6 +1131,25 @@
       /* Starfield points slow rotation */
       if (starPoints) {
         starPoints.rotation.y += dt * 0.05;
+      }
+
+      /* Dust particles float and drift */
+      if (dustParticles) {
+        dustParticles.rotation.y += dt * 0.02;
+        var dPositions = dustParticles.geometry.attributes.position.array;
+        for (var dpi = 0; dpi < dPositions.length; dpi += 3) {
+          dPositions[dpi + 1] += Math.sin(elapsedTotal * 0.5 + dpi) * dt * 0.15;
+          if (dPositions[dpi + 1] > 7) dPositions[dpi + 1] = 0.3;
+        }
+        dustParticles.geometry.attributes.position.needsUpdate = true;
+      }
+
+      /* Accent lights subtle pulse */
+      if (purpleLight) {
+        purpleLight.intensity = 0.6 + Math.sin(elapsedTotal * 0.5) * 0.15;
+      }
+      if (amberLight) {
+        amberLight.intensity = 0.4 + Math.sin(elapsedTotal * 0.7 + 1) * 0.1;
       }
 
       /* Floating star spheres */

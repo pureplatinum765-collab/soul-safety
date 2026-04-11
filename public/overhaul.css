@@ -1,0 +1,728 @@
+/* ============================================================
+   overhaul.css — Soul Safety Immersive Visual Overhaul
+   Curiosity Shop, Factoids, Scene Illustrations, Atmosphere
+   ============================================================ */
+
+/* ── Global Texture Layer: Paper Grain ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ── Section Dividers: Watercolor Wash ── */
+.section-wash {
+  position: relative;
+  height: 80px;
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.section-wash::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(212,105,62,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(107,142,95,0.06) 0%, transparent 60%);
+  filter: blur(30px);
+}
+
+/* ── CURIOSITY SHOP — Whimsical Store Redesign ── */
+.curiosity-shop {
+  position: relative;
+}
+
+.curiosity-shop__inner {
+  position: relative;
+  background:
+    linear-gradient(180deg, 
+      rgba(62,38,20,0.95) 0%, 
+      rgba(45,28,15,0.98) 40%, 
+      rgba(35,22,12,0.95) 100%) !important;
+  border: 1px solid rgba(139,90,43,0.35) !important;
+  border-radius: 20px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 40px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,200,100,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.3) !important;
+}
+
+/* Wood grain overlay */
+.curiosity-shop__inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 30px,
+      rgba(139,90,43,0.05) 30px,
+      rgba(139,90,43,0.05) 31px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 60px,
+      rgba(139,90,43,0.03) 60px,
+      rgba(139,90,43,0.03) 61px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Shop Header */
+.shop-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 1.8rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(139,90,43,0.2);
+  background: linear-gradient(180deg, rgba(80,50,25,0.4) 0%, transparent 100%);
+}
+
+.shop-header .feed-label {
+  color: #f0d9a8 !important;
+  font-size: clamp(1.5rem, 3vw, 2rem) !important;
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+
+.shop-signage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  color: rgba(240,217,168,0.6);
+  font-size: 0.85rem;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+/* Lantern SVGs at top of shop */
+.shop-lantern {
+  position: absolute;
+  top: 0.8rem;
+  width: 32px;
+  height: 52px;
+  z-index: 2;
+  filter: drop-shadow(0 0 12px rgba(255,170,60,0.4));
+  animation: lanternSway 4s ease-in-out infinite;
+}
+.shop-lantern--left { left: 1.2rem; animation-delay: 0s; }
+.shop-lantern--right { right: 1.2rem; animation-delay: -2s; }
+
+@keyframes lanternSway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+/* Shelf rows */
+.shop-shelf {
+  position: relative;
+  z-index: 1;
+  padding: 1.2rem 1.5rem 0.8rem;
+}
+.shop-shelf + .shop-shelf {
+  border-top: none;
+}
+
+/* Shelf wooden edge */
+.shop-shelf::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 6px;
+  background: linear-gradient(180deg, rgba(100,60,25,0.6) 0%, rgba(60,35,15,0.8) 100%);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+/* Shelf label */
+.shelf-label {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(240,217,168,0.4);
+  margin-bottom: 0.6rem;
+}
+
+/* Game items on shelves */
+.curiosity-shop__grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0.8rem !important;
+  margin-top: 0 !important;
+}
+
+.curiosity-card {
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 1.2rem 0.8rem !important;
+  border-radius: 12px !important;
+  background: linear-gradient(180deg, 
+    rgba(80,50,25,0.5) 0%, 
+    rgba(55,35,18,0.7) 100%) !important;
+  border: 1px solid rgba(139,90,43,0.3) !important;
+  color: #f0d9a8 !important;
+  font-size: 0.85rem !important;
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 
+    0 4px 16px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,200,100,0.06) !important;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), 
+              box-shadow 0.2s ease,
+              background 0.2s ease !important;
+  margin-bottom: 0 !important;
+}
+
+.curiosity-card:hover {
+  transform: translateY(-4px) scale(1.02) !important;
+  background: linear-gradient(180deg, 
+    rgba(100,65,30,0.6) 0%, 
+    rgba(70,45,22,0.8) 100%) !important;
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.4),
+    0 0 30px rgba(255,170,60,0.1),
+    inset 0 1px 0 rgba(255,200,100,0.1) !important;
+  border-color: rgba(255,170,60,0.3) !important;
+}
+
+.curiosity-card .card-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 8px rgba(255,170,60,0.3));
+}
+
+.curiosity-card .card-label {
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+/* Shop footer: warm glow at bottom */
+.shop-footer {
+  position: relative;
+  z-index: 1;
+  padding: 0.8rem 1.5rem 1.2rem;
+  text-align: center;
+}
+
+/* Challenge banner in shop */
+.curiosity-shop .challenge-banner {
+  position: relative;
+  z-index: 1;
+  margin: 0.8rem 1.5rem;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  background: rgba(212,105,62,0.12);
+  border: 1px solid rgba(212,105,62,0.2);
+  color: #f0d9a8;
+  font-size: 0.85rem;
+}
+
+/* Subtitle override */
+.curiosity-shop__subtitle {
+  color: rgba(240,217,168,0.5) !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.2rem !important;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+}
+
+@media (max-width: 500px) {
+  .curiosity-shop__grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .curiosity-card {
+    padding: 1rem 0.6rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* ── FACTOIDS SYSTEM ── */
+.factoid-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.factoid-note {
+  position: absolute;
+  max-width: 220px;
+  padding: 0.9rem 1rem;
+  background: rgba(253,250,246,0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(240,217,168,0.1);
+  border-radius: 8px;
+  color: rgba(240,228,210,0.55);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  transform: rotate(var(--rotation, 0deg));
+  opacity: 0;
+  animation: factoidFadeIn 1.5s ease forwards;
+  animation-delay: var(--delay, 0s);
+  pointer-events: auto;
+  cursor: default;
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.factoid-note:hover {
+  opacity: 1 !important;
+  color: rgba(240,228,210,0.85);
+  border-color: rgba(212,105,62,0.25);
+  transform: rotate(0deg) scale(1.03);
+  z-index: 10;
+}
+
+.factoid-note .factoid-author {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.65rem;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(212,105,62,0.5);
+}
+
+@keyframes factoidFadeIn {
+  0% { opacity: 0; transform: rotate(var(--rotation, 0deg)) translateY(10px); }
+  100% { opacity: var(--target-opacity, 0.6); transform: rotate(var(--rotation, 0deg)) translateY(0); }
+}
+
+/* Light mode factoids */
+[data-theme="light"] .factoid-note,
+:root:not([data-theme]) .factoid-note {
+  background: rgba(253,250,246,0.7);
+  border-color: rgba(139,90,43,0.12);
+  color: rgba(74,63,47,0.5);
+  box-shadow: 0 4px 20px rgba(60,40,20,0.08);
+}
+
+[data-theme="light"] .factoid-note:hover,
+:root:not([data-theme]) .factoid-note:hover {
+  color: rgba(74,63,47,0.85);
+  border-color: rgba(212,105,62,0.2);
+}
+
+/* Factoid add button */
+.factoid-add-btn {
+  position: fixed;
+  left: 1rem;
+  bottom: 5rem;
+  z-index: 85;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,105,62,0.25);
+  background: rgba(18,14,10,0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(212,105,62,0.7);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+.factoid-add-btn:hover {
+  background: rgba(212,105,62,0.15);
+  border-color: rgba(212,105,62,0.5);
+  color: #d4693e;
+  transform: scale(1.08);
+}
+
+[data-theme="light"] .factoid-add-btn,
+:root:not([data-theme]) .factoid-add-btn {
+  background: rgba(253,250,246,0.9);
+  border-color: rgba(212,105,62,0.2);
+  box-shadow: 0 4px 16px rgba(60,40,20,0.1);
+}
+
+/* Factoid compose modal */
+.factoid-compose {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,7,5,0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.factoid-compose.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.factoid-compose-card {
+  width: min(380px, 90%);
+  background: var(--color-surface-raised, #231c16);
+  border: 1px solid var(--color-border, rgba(255,220,185,0.08));
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.factoid-compose.open .factoid-compose-card {
+  transform: translateY(0);
+}
+
+.factoid-compose-card h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.factoid-compose-card textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.95rem;
+  padding: 0.8rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.factoid-compose-card textarea:focus {
+  border-color: rgba(212,105,62,0.4);
+}
+
+.factoid-compose-card .about-selector {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+
+.factoid-compose-card .about-option {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.factoid-compose-card .about-option.selected {
+  background: rgba(212,105,62,0.15);
+  border-color: rgba(212,105,62,0.4);
+  color: var(--color-text);
+}
+
+.factoid-compose-card .compose-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.factoid-compose-card .compose-actions button {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.factoid-compose-card .compose-actions .compose-submit {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.factoid-compose-card .compose-actions .compose-submit:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ── SVG SCENE ILLUSTRATIONS ── */
+.scene-illustration {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+}
+
+/* Vine decorations on sections */
+.vine-deco {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vine-deco svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Hero section botanical frame */
+.hero {
+  position: relative;
+}
+
+.hero-botanical {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.15;
+}
+
+.hero-botanical--tl { top: 5%; left: 2%; }
+.hero-botanical--tr { top: 5%; right: 2%; transform: scaleX(-1); }
+.hero-botanical--bl { bottom: 15%; left: 3%; }
+.hero-botanical--br { bottom: 15%; right: 3%; transform: scaleX(-1); }
+
+/* Floating lantern decorations */
+.floating-lantern {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.2;
+  animation: lanternFloat 8s ease-in-out infinite;
+}
+
+@keyframes lanternFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+/* ── BOARD GAME PORTAL ── */
+.game-section {
+  position: relative;
+}
+
+.game-section__inner {
+  position: relative;
+  overflow: hidden;
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(10,5,32,0.6) 0%, transparent 60%),
+    var(--game-surface, #fff) !important;
+  border: 2px solid rgba(139,90,43,0.25) !important;
+  box-shadow: 
+    0 0 60px rgba(26,10,62,0.15),
+    0 8px 40px rgba(0,0,0,0.2),
+    inset 0 0 80px rgba(10,5,32,0.1) !important;
+}
+
+[data-theme="dark"] .game-section__inner {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(30,15,80,0.3) 0%, transparent 60%),
+    rgba(18,14,10,1) !important;
+  border-color: rgba(100,60,160,0.2) !important;
+  box-shadow: 
+    0 0 80px rgba(100,50,180,0.08),
+    0 12px 48px rgba(0,0,0,0.4),
+    inset 0 0 100px rgba(30,15,80,0.15) !important;
+}
+
+/* Ornate frame corners */
+.game-section__inner::before,
+.game-section__inner::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.3;
+}
+.game-section__inner::before {
+  top: 8px;
+  left: 8px;
+  border-top: 2px solid rgba(218,165,32,0.5);
+  border-left: 2px solid rgba(218,165,32,0.5);
+  border-radius: 4px 0 0 0;
+}
+.game-section__inner::after {
+  top: 8px;
+  right: 8px;
+  border-top: 2px solid rgba(218,165,32,0.5);
+  border-right: 2px solid rgba(218,165,32,0.5);
+  border-radius: 0 4px 0 0;
+}
+
+/* Bottom corners via child element */
+.game-frame-corner-bl,
+.game-frame-corner-br {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.3;
+}
+.game-frame-corner-bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom: 2px solid rgba(218,165,32,0.5);
+  border-left: 2px solid rgba(218,165,32,0.5);
+  border-radius: 0 0 0 4px;
+}
+.game-frame-corner-br {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 2px solid rgba(218,165,32,0.5);
+  border-right: 2px solid rgba(218,165,32,0.5);
+  border-radius: 0 0 4px 0;
+}
+
+/* Portal transition on scroll */
+.game-section.portal-active .game-section__inner {
+  animation: portalPulse 3s ease-in-out infinite;
+}
+
+@keyframes portalPulse {
+  0%, 100% { box-shadow: 0 0 60px rgba(100,50,180,0.05), 0 8px 40px rgba(0,0,0,0.2); }
+  50% { box-shadow: 0 0 100px rgba(100,50,180,0.12), 0 8px 40px rgba(0,0,0,0.2); }
+}
+
+/* ── SECTION ATMOSPHERE ── */
+/* Each major section gets a subtle warm glow element */
+.section-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,105,62,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+}
+
+/* Feed section atmospheric elements */
+.feed-section {
+  position: relative;
+}
+
+/* Mood section polish */
+.mood-section {
+  position: relative;
+}
+
+/* Section-specific atmosphere colors */
+.hero .section-glow { background: radial-gradient(circle, rgba(212,105,62,0.1) 0%, transparent 70%); }
+.curiosity-shop .section-glow { background: radial-gradient(circle, rgba(255,170,60,0.06) 0%, transparent 70%); }
+.game-section .section-glow { background: radial-gradient(circle, rgba(100,50,180,0.06) 0%, transparent 70%); }
+
+/* ── SCROLL REVEAL ENHANCEMENTS ── */
+.reveal-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-section.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger children */
+.reveal-section:nth-child(2) { transition-delay: 0.1s; }
+.reveal-section:nth-child(3) { transition-delay: 0.15s; }
+.reveal-section:nth-child(4) { transition-delay: 0.2s; }
+
+/* ── PARALLAX LAYERS ── */
+.parallax-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+/* ── CONSTELLATION PATTERN OVERLAY ── */
+.constellation-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+}
+
+/* ── Warm glow spots near interactive elements ── */
+.glow-spot {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,170,60,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  filter: blur(20px);
+  z-index: 0;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .factoid-note {
+    max-width: 160px;
+    font-size: 0.72rem;
+    padding: 0.7rem;
+  }
+  .factoid-add-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    bottom: 5.5rem;
+  }
+  .hero-botanical { display: none; }
+  .shop-lantern { width: 24px; height: 40px; }
+  .game-frame-corner-bl,
+  .game-frame-corner-br,
+  .game-section__inner::before,
+  .game-section__inner::after { width: 35px; height: 35px; }
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  .factoid-note { animation: none !important; opacity: var(--target-opacity, 0.5) !important; }
+  .shop-lantern { animation: none !important; }
+  .floating-lantern { animation: none !important; }
+  .game-section.portal-active .game-section__inner { animation: none !important; }
+  @keyframes lanternFloat { 0%, 100% { transform: none; } }
+}

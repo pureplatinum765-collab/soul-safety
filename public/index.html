@@ -44,6 +44,8 @@
   <link rel="stylesheet" href="./minigames.css">
   <!-- Immersive depth system — overlays all other styles -->
   <link rel="stylesheet" href="./immersive.css">
+  <!-- Visual overhaul: Curiosity Shop, Factoids, Scene Illustrations -->
+  <link rel="stylesheet" href="./overhaul.css">
 
   <!-- Favicon (inline SVG) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c2623a'/><path d='M16 8c-3 0-5.5 2-6 5-.5 3 1 5 3 6.5S16 22 16 24c0-2 2.5-3 3-4.5s3.5-3.5 3-6.5c-.5-3-3-5-6-5z' fill='%23faf6ef'/></svg>" type="image/svg+xml">
@@ -206,15 +208,55 @@
   </section>
 
   <section class="curiosity-shop" id="curiosityShop">
-    <div class="curiosity-shop__inner vine-border">
-      <div class="feed-label">Curiosity Shop</div>
-      <p class="curiosity-shop__subtitle">Spin up a tiny adventure together.</p>
-      <div class="curiosity-shop__grid">
-        <button class="curiosity-card" type="button" data-minigame-launch="pong">🏓 Pong Challenge</button>
-        <button class="curiosity-card" type="button" data-minigame-launch="rps">✂️ Rock Paper Scissors</button>
-        <button class="curiosity-card" type="button" data-minigame-launch="lucky-word">🍀 Lucky Word</button>
+    <div class="curiosity-shop__inner">
+      <!-- Lanterns -->
+      <svg class="shop-lantern shop-lantern--left" viewBox="0 0 32 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 0 L16 8" stroke="rgba(255,200,100,0.4)" stroke-width="1"/>
+        <rect x="8" y="8" width="16" height="4" rx="2" fill="rgba(255,200,100,0.2)"/>
+        <path d="M9 12 C9 12, 5 24, 8 36 C10 42, 22 42, 24 36 C27 24, 23 12, 23 12" fill="rgba(255,170,60,0.1)" stroke="rgba(255,200,100,0.25)" stroke-width="1"/>
+        <ellipse cx="16" cy="26" rx="5" ry="8" fill="rgba(255,170,60,0.15)"/>
+        <ellipse cx="16" cy="26" rx="2.5" ry="4" fill="rgba(255,210,120,0.25)"/>
+      </svg>
+      <svg class="shop-lantern shop-lantern--right" viewBox="0 0 32 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 0 L16 8" stroke="rgba(255,200,100,0.4)" stroke-width="1"/>
+        <rect x="8" y="8" width="16" height="4" rx="2" fill="rgba(255,200,100,0.2)"/>
+        <path d="M9 12 C9 12, 5 24, 8 36 C10 42, 22 42, 24 36 C27 24, 23 12, 23 12" fill="rgba(255,170,60,0.1)" stroke="rgba(255,200,100,0.25)" stroke-width="1"/>
+        <ellipse cx="16" cy="26" rx="5" ry="8" fill="rgba(255,170,60,0.15)"/>
+        <ellipse cx="16" cy="26" rx="2.5" ry="4" fill="rgba(255,210,120,0.25)"/>
+      </svg>
+
+      <!-- Shop Header -->
+      <div class="shop-header">
+        <div class="feed-label">The Curiosity Shop</div>
+        <div class="shop-signage">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Wonders await within
+        </div>
       </div>
-      <div class="challenge-banner" id="challengeBanner" hidden></div>
+
+      <!-- Shelf with games -->
+      <div class="shop-shelf">
+        <div class="shelf-label">Games &amp; Diversions</div>
+        <div class="curiosity-shop__grid">
+          <button class="curiosity-card" type="button" data-minigame-launch="pong">
+            <span class="card-icon">🏓</span>
+            <span class="card-label">Pong Challenge</span>
+          </button>
+          <button class="curiosity-card" type="button" data-minigame-launch="rps">
+            <span class="card-icon">✂️</span>
+            <span class="card-label">Rock Paper Scissors</span>
+          </button>
+          <button class="curiosity-card" type="button" data-minigame-launch="lucky-word">
+            <span class="card-icon">🍀</span>
+            <span class="card-label">Lucky Word</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Shop Footer -->
+      <div class="shop-footer">
+        <div class="challenge-banner" id="challengeBanner" hidden></div>
+      </div>
     </div>
   </section>
 
@@ -647,7 +689,8 @@
 
   <!-- Immersive interactions: cursor, Lenis, tilt, particles -->
   <script src="./immersive.js"></script>
-
+  <!-- Visual overhaul: factoids, illustrations, portal effect -->
+  <script src="./overhaul.js"></script>
 
 </body>
 </html>

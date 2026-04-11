@@ -11,6 +11,9 @@ import fs from "fs";
 // POST /api/messages/media      → upload media
 // GET  /api/messages/:id/media  → get media binary
 // DELETE /api/messages/:id      → delete message
+// GET  /api/messages/factoids   → list factoids
+// POST /api/messages/factoids   → create factoid
+// DELETE /api/messages/factoids/:id → delete factoid
 
 export const config = { api: { bodyParser: false } };
 
@@ -92,6 +95,47 @@ export default async function handler(req, res) {
       if (error) throw error;
       try { fs.unlinkSync(filePath); } catch {}
       return json(res, 201, { id, user_id: userId, type: mediaTypeName, media_type: mediaContentType, duration, timestamp });
+    }
+
+    // GET /api/messages/factoids — list all factoids
+    if (after === "factoids" && req.method === "GET") {
+      const db = getSupabase();
+      const { data: rows, error } = await db
+        .from("factoids")
+        .select("id, user_id, about, text, created_at")
+        .order("created_at", { ascending: true });
+      if (error) {
+        // Table may not exist yet — return empty array gracefully
+        if (error.code === '42P01') return json(res, 200, []);
+        throw error;
+      }
+      return json(res, 200, rows || []);
+    }
+
+    // POST /api/messages/factoids — create factoid
+    if (after === "factoids" && req.method === "POST") {
+      const body = await safeJson(req);
+      if (!body?.text || typeof body.text !== "string" || body.text.trim() === "") {
+        return json(res, 400, { error: "Factoid text required" });
+      }
+      const actingUserId = resolveActingUserId(auth.userId, body?.user_id) || "raphael";
+      const about = ["raphael", "taylor"].includes(body?.about) ? body.about : actingUserId;
+      const id = uuid();
+      const timestamp = nowTs();
+      const db = getSupabase();
+      const { error } = await db.from("factoids").insert({
+        id, user_id: actingUserId, about, text: body.text.trim(), created_at: timestamp
+      });
+      if (error) throw error;
+      return json(res, 201, { id, user_id: actingUserId, about, text: body.text.trim(), created_at: timestamp });
+    }
+
+    // DELETE /api/messages/factoids/:id
+    if (req.method === "DELETE" && after.startsWith("factoids/")) {
+      const factoidId = after.replace("factoids/", "");
+      const db = getSupabase();
+      await db.from("factoids").delete().eq("id", factoidId);
+      return json(res, 200, { deleted: factoidId });
     }
 
     // Dynamic :id routes
