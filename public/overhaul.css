@@ -678,11 +678,22 @@ body::before {
 
 /* ── CONSTELLATION PATTERN OVERLAY ── */
 .constellation-layer {
-  position: fixed;
+  position: fixed !important;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   opacity: 0.04;
+}
+
+/* Ensure scroll-progress stays fixed */
+.scroll-progress {
+  position: fixed !important;
+}
+
+/* Section wash shouldn't break layout */
+.section-wash {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Warm glow spots near interactive elements ── */

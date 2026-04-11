@@ -53,7 +53,7 @@
 .ambient-canvas.visible { opacity: 1; }
 
 /* Make sure all real content sits above ambient layer */
-body > *:not(.ambient-canvas):not(.cursor-ring):not(.cursor-dot):not(.float-orb):not(.pin-gate-overlay):not(.minigame-overlay):not(#bloomOverlay) {
+body > *:not(.ambient-canvas):not(.cursor-ring):not(.cursor-dot):not(.float-orb):not(.pin-gate-overlay):not(.minigame-overlay):not(#bloomOverlay):not(.constellation-layer):not(.scroll-progress):not(.factoid-layer):not(.factoid-add-btn):not(.factoid-compose):not(#livingCanvas):not(.section-wash) {
   position: relative;
   z-index: 1;
 }
