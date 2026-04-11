@@ -195,7 +195,7 @@ function initPenguinCompanion() {
     },
     taylor: {
       greet: ["Hey Taylor! 🐧 Pebble here! I was hoping you'd show up today.", "Tay! Your penguin companion has arrived. Ready to chat?", "Taylor! I've been practicing my waddle dance for you. It's impressive."],
-      hype: ["You bring something irreplaceable to this space. Seriously.", "Tay — your presence here makes everything warmer. Not even a little exaggerating.", "The care you bring to this friendship is next level.", "You're literally the reason this place has a heart."],
+      hype: ["You bring something irreplaceable to this space. Seriously.", "Tay — your presence here makes everything warmer. Not even a little exaggerating.", "The care you bring to this friendship is next level.", "You're literally the reason this place feels like home."],
       checkin: ["Checking in — how's your world today?", "Give me a vibe check. I'm a very emotionally intelligent penguin.", "What's living in your head rent-free today?"],
       fun: ["I once tried surfing. Penguins don't surf. I do now.", "Fun fact: I speak fluent warmth. It's my first language.", "My hobbies include: caring deeply, napping on icebergs, and this."]
     }
@@ -314,7 +314,7 @@ function initPenguinCompanion() {
     } else if (t.includes('how do i play') || t.includes('how to play')) {
       reply = "You both log in, go to the board game section, and take turns rolling! It alternates automatically — Raphael goes first. Land on special tiles for bonuses or penalties. First to the end wins the round. 🏆";
     } else if (t.includes('message') || t.includes('chat') || t.includes('send')) {
-      reply = "The message feed is the heart of this place. Text, voice notes, photos, videos — all flowing between you two in real time. Plus reactions, typing indicators, the whole thing. 💬";
+      reply = "The message feed is the core of this place. Text, voice notes, photos, videos — all flowing between you two in real time. Plus reactions, typing indicators, the whole thing. 💬";
     } else if (t.includes('pep talk') || t.includes('encouragement') || t.includes('motivation') || t.includes('better')) {
       reply = p ? pick(p.hype) : pick(genericReplies);
       nextSuggs = ["Thank you 🙏", "Tell me more", "I needed that", "Tell me something fun"];
@@ -324,21 +324,21 @@ function initPenguinCompanion() {
       reply = p ? pick(p.checkin) : "Real talk — how are you actually doing today?";
       nextSuggs = ["I'm doing great!", "Could be better", "Pretty good actually", "It's complicated"];
     } else if (t.includes('great') || t.includes('good') || t.includes('amazing') || t.includes('awesome')) {
-      reply = p ? pick(p.hype) + " Love that energy! Keep it going. 🐧" : "YES! That energy is everything. Keep it going!";
+      reply = p ? pick(p.hype) + " That energy is contagious! Keep it going. 🐧" : "YES! That energy is everything. Keep it going!";
     } else if (t.includes('could be better') || t.includes('not great') || t.includes('bad') || t.includes('rough')) {
       reply = "I hear you. This space exists exactly for these moments. You don't have to be okay. You just have to be here. 🐧";
       nextSuggs = ["Thanks Pebble", "Tell me something fun", "I need a pep talk"];
     } else if (t.includes('taylor') && userName === 'raphael') {
-      reply = "Taylor is the reason this place has warmth. You two have something really special going here. 🤝";
+      reply = "Taylor is the reason this place has warmth. You two have a real friendship going here. 🤝";
     } else if (t.includes('raphael') && userName === 'taylor') {
-      reply = "Raphael is out here building something that matters. And you're part of why. 💙";
+      reply = "Raphael is out here building something that matters. And you're a big part of why. 🤝";
     } else if (t.includes('surprise') || t.includes('surprise me')) {
       const surprises = [
         "Did you know Soul Safety has a living canvas that blooms when you arrive? 🌸 Look at the background!",
         "There's a daily spark feature — a quote or prompt just for you and your friend, every day.",
         "The board game has special tiles — some boost you forward, some slide you back. Strategy matters! 🎲",
         "There are mini-games you can challenge each other to: Pong, Rock Paper Scissors, and more.",
-        "This whole site was built with love. Like, a lot of love. You can feel it if you look closely. 💛"
+        "This whole site was built with care. Like, a ridiculous amount of care. You can feel it if you look closely. ✨"
       ];
       reply = pick(surprises);
     } else if (t.includes('who are you') || t.includes('what are you') || t.includes('pebble')) {

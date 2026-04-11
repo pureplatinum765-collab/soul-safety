@@ -26,7 +26,7 @@
     { author: 'taylor', about: 'raphael', content: 'Raphael makes the best playlists for road trips' },
     { author: 'raphael', about: 'taylor', content: 'Taylor finds the coolest little shops everywhere she goes' },
     { author: 'taylor', about: 'raphael', content: 'Raphael sees beauty in everything, even the mundane' },
-    { author: 'raphael', about: '', content: 'I believe every sunset is a love letter from the universe' },
+    { author: 'raphael', about: '', content: 'I believe every sunset is the universe saying goodnight' },
     { author: 'taylor', about: '', content: 'Curiosity is my compass, wonder is my map' },
     { author: 'raphael', about: 'taylor', content: 'Taylor\'s laugh could brighten the darkest room' },
     { author: 'taylor', about: 'raphael', content: 'Raphael\'s energy is like a warm campfire on a cold night' },

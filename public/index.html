@@ -48,7 +48,7 @@
   <link rel="stylesheet" href="./overhaul.css">
 
   <!-- Favicon (inline SVG) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c2623a'/><path d='M16 8c-3 0-5.5 2-6 5-.5 3 1 5 3 6.5S16 22 16 24c0-2 2.5-3 3-4.5s3.5-3.5 3-6.5c-.5-3-3-5-6-5z' fill='%23faf6ef'/></svg>" type="image/svg+xml">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23c2623a'/><path d='M16 6C11 6 7 10 7 15C7 22 16 28 16 28C16 28 25 22 25 15C25 10 21 6 16 6Z' fill='none' stroke='%23faf6ef' stroke-width='1.5'/><path d='M16 11L17.2 14L20.5 14.2L18 16.5L18.7 20L16 18.2L13.3 20L14 16.5L11.5 14.2L14.8 14Z' fill='%23faf6ef'/></svg>" type="image/svg+xml">
   <style>
     .pin-gate-overlay {
       position: fixed;
@@ -177,20 +177,22 @@
     <div class="hero-overlay"></div>
     <div class="sparkle-container" id="sparkles"></div>
     <div class="hero-content">
-      <!-- SVG Logo -->
+      <!-- SVG Logo — Compass/safe-place pin -->
       <div class="hero-logo" aria-label="Soul Safety logo">
         <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="40" cy="40" r="36" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-          <path d="M40 12C28 12 20 22 18 32C16 42 22 50 30 55C35 58 38 60 40 66C42 60 45 58 50 55C58 50 64 42 62 32C60 22 52 12 40 12Z" 
+          <!-- Location pin / safe-place marker -->
+          <path d="M40 14C29 14 20 23 20 34C20 48 40 66 40 66C40 66 60 48 60 34C60 23 51 14 40 14Z" 
                 fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <!-- Star inside the pin -->
+          <path d="M40 26L42.5 32.5L49 33L44 37.5L45.5 44L40 40.5L34.5 44L36 37.5L31 33L37.5 32.5Z" 
+                fill="currentColor" opacity="0.6"/>
           <circle cx="25" cy="20" r="1.5" fill="currentColor" opacity="0.5"/>
           <circle cx="58" cy="22" r="1" fill="currentColor" opacity="0.4"/>
           <circle cx="15" cy="40" r="1" fill="currentColor" opacity="0.3"/>
           <circle cx="65" cy="38" r="1.5" fill="currentColor" opacity="0.4"/>
           <circle cx="32" cy="70" r="1" fill="currentColor" opacity="0.3"/>
           <circle cx="50" cy="68" r="1" fill="currentColor" opacity="0.4"/>
-          <path d="M40 36C38 32 34 30 32 32C30 34 30 38 40 44C50 38 50 34 48 32C46 30 42 32 40 36Z" 
-                fill="currentColor" opacity="0.6"/>
           <circle cx="40" cy="8" r="1" fill="currentColor" opacity="0.6"/>
           <circle cx="72" cy="40" r="1" fill="currentColor" opacity="0.5"/>
           <circle cx="8" cy="40" r="1" fill="currentColor" opacity="0.5"/>
@@ -276,9 +278,9 @@
     <div class="top-bar-left">
       <div class="top-bar-logo">
         <svg width="24" height="24" viewBox="0 0 80 80" fill="none">
-          <path d="M40 12C28 12 20 22 18 32C16 42 22 50 30 55C35 58 38 60 40 66C42 60 45 58 50 55C58 50 64 42 62 32C60 22 52 12 40 12Z" 
+          <path d="M40 14C29 14 20 23 20 34C20 48 40 66 40 66C40 66 60 48 60 34C60 23 51 14 40 14Z" 
                 fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-          <path d="M40 36C38 32 34 30 32 32C30 34 30 38 40 44C50 38 50 34 48 32C46 30 42 32 40 36Z" 
+          <path d="M40 26L42.5 32.5L49 33L44 37.5L45.5 44L40 40.5L34.5 44L36 37.5L31 33L37.5 32.5Z" 
                 fill="currentColor" opacity="0.6"/>
         </svg>
         <span>Soul Safety</span>
@@ -346,7 +348,7 @@
           <button class="mood-emoji-btn" onclick="setMood('raphael', '🧗', 'climbing high')">🧗</button>
           <button class="mood-emoji-btn" onclick="setMood('raphael', '✨', 'starmilk hours')">✨</button>
           <button class="mood-emoji-btn" onclick="setMood('raphael', '🛸', 'roller skating')">🛸</button>
-          <button class="mood-emoji-btn" onclick="setMood('raphael', '💛', 'full of love')">💛</button>
+          <button class="mood-emoji-btn" onclick="setMood('raphael', '💛', 'grateful vibes')">💛</button>
         </div>
       </div>
       <div class="mood-card" id="moodTaylor">
@@ -363,7 +365,7 @@
           <button class="mood-emoji-btn" onclick="setMood('taylor', '🧗', 'summit seeking')">🧗</button>
           <button class="mood-emoji-btn" onclick="setMood('taylor', '✨', 'cosmic feels')">✨</button>
           <button class="mood-emoji-btn" onclick="setMood('taylor', '🛸', 'roller skating')">🛸</button>
-          <button class="mood-emoji-btn" onclick="setMood('taylor', '💚', 'full of love')">💚</button>
+          <button class="mood-emoji-btn" onclick="setMood('taylor', '💚', 'grateful vibes')">💚</button>
         </div>
       </div>
     </div>

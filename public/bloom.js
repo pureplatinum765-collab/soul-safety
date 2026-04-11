@@ -1,7 +1,7 @@
 /**
  * bloom.js — Blooming flower entry animation
  * A flower bud opens petal by petal, revealing the message
- * "Welcome to an open heart. Peace is here if you need it."
+ * "Welcome to a safe place. Peace is here if you need it."
  * Then fades out and reveals the site.
  */
 (function() {
@@ -115,7 +115,7 @@
     // Main message
     ctx.font = '500 clamp(18px, 4vw, 28px) "Sentient", serif';
     ctx.fillStyle = '#faf6ef';
-    ctx.fillText('Welcome to an open heart', cx, cy + (Math.min(W, H) * 0.22));
+    ctx.fillText('Welcome to a safe place', cx, cy + (Math.min(W, H) * 0.22));
 
     // Sub message
     ctx.font = '400 clamp(13px, 2.5vw, 17px) "General Sans", sans-serif';
