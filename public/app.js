@@ -650,21 +650,32 @@ function selectUser(userId, lockSelection = false) {
 }
 
 // ===== DAILY SPARK =====
+function dismissSparkPopup() {
+  const popup = document.getElementById('sparkPopup');
+  if (!popup || popup.style.display === 'none') return;
+  popup.style.opacity = '0';
+  popup.style.transition = 'opacity 0.3s ease';
+  setTimeout(() => { popup.style.display = 'none'; }, 300);
+  sessionStorage.setItem('sparkShownToday', new Date().toISOString().slice(0, 10));
+}
+
 function initDailySparkUi() {
-  // Dismiss button on spark popup
+  // Dismiss button
   const dismissBtn = document.getElementById('sparkPopupDismiss');
-  if (dismissBtn) {
-    dismissBtn.addEventListener('click', () => {
-      const popup = document.getElementById('sparkPopup');
-      if (popup) {
-        popup.style.opacity = '0';
-        popup.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => { popup.style.display = 'none'; }, 300);
-      }
-      // Remember we showed the spark today so it doesn't re-pop
-      sessionStorage.setItem('sparkShownToday', new Date().toISOString().slice(0, 10));
+  if (dismissBtn) dismissBtn.addEventListener('click', dismissSparkPopup);
+
+  // Click-outside-to-close (click on overlay backdrop)
+  const popup = document.getElementById('sparkPopup');
+  if (popup) {
+    popup.addEventListener('click', (e) => {
+      if (e.target === popup) dismissSparkPopup();
     });
   }
+
+  // ESC key to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') dismissSparkPopup();
+  });
 }
 
 function showSparkPopup() {

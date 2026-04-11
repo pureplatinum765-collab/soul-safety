@@ -1550,9 +1550,11 @@ body {
   -webkit-backdrop-filter: blur(16px);
   padding: var(--space-6);
   animation: sparkFadeIn 350ms ease;
+  cursor: pointer;
 }
 
 .spark-popup-card {
+  cursor: default;
   width: min(420px, 100%);
   padding: var(--space-8) var(--space-6);
   border-radius: var(--radius-xl);
