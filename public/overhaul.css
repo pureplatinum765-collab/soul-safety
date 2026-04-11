@@ -711,16 +711,11 @@ body::before {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
-  .factoid-note {
-    max-width: 160px;
-    font-size: 0.72rem;
-    padding: 0.7rem;
+  .factoid-layer {
+    display: none;
   }
   .factoid-add-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 1.1rem;
-    bottom: 5.5rem;
+    display: none;
   }
   .hero-botanical { display: none; }
   .shop-lantern { width: 24px; height: 40px; }
