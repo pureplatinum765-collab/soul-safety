@@ -53,8 +53,9 @@
 
     var feedLabel = feedSection.querySelector('.feed-label');
 
-    // Start collapsed
-    feedSection.classList.add('collapsed');
+    // Feed starts hidden via CSS (:not(.feed-open))
+    // Do NOT add feed-open class — it stays hidden until user clicks toggle
+    feedSection.classList.remove('feed-open');
 
     // Create toggle button (chat bubble icon)
     var toggleBtn = document.createElement('button');
@@ -63,29 +64,36 @@
     toggleBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>';
     document.body.appendChild(toggleBtn);
 
-    function toggleChat() {
-      var isCollapsed = feedSection.classList.contains('collapsed');
-      feedSection.classList.toggle('collapsed');
-      toggleBtn.classList.toggle('hidden', !feedSection.classList.contains('collapsed'));
-      
-      if (isCollapsed) {
-        // Opening: scroll to bottom of feed
-        var container = document.getElementById('feedContainer');
-        if (container) {
-          setTimeout(function() {
-            container.scrollTop = container.scrollHeight;
-          }, 300);
-        }
+    var chatIsOpen = false;
+
+    function openChat() {
+      chatIsOpen = true;
+      feedSection.classList.add('feed-open');
+      feedSection.classList.remove('collapsed');
+      toggleBtn.classList.add('hidden');
+      // Scroll feed to bottom
+      var container = document.getElementById('feedContainer');
+      if (container) {
+        setTimeout(function() {
+          container.scrollTop = container.scrollHeight;
+        }, 300);
       }
     }
 
-    toggleBtn.addEventListener('click', toggleChat);
+    function closeChat() {
+      chatIsOpen = false;
+      feedSection.classList.add('collapsed');
+      toggleBtn.classList.remove('hidden');
+      // After transition, remove feed-open
+      setTimeout(function() {
+        if (!chatIsOpen) feedSection.classList.remove('feed-open');
+      }, 300);
+    }
+
+    toggleBtn.addEventListener('click', openChat);
 
     if (feedLabel) {
-      feedLabel.addEventListener('click', function() {
-        feedSection.classList.add('collapsed');
-        toggleBtn.classList.remove('hidden');
-      });
+      feedLabel.addEventListener('click', closeChat);
     }
 
     // Update placeholder to show user name

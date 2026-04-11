@@ -126,10 +126,23 @@ body {
   padding: 0 !important;
 }
 
-.feed-section.collapsed {
-  transform: translateY(calc(100% + 20px));
-  opacity: 0;
-  pointer-events: none;
+/* Feed starts hidden via CSS — JS adds .feed-open when user clicks toggle */
+.feed-section:not(.feed-open) {
+  transform: translateY(calc(100% + 20px)) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.feed-section.feed-open {
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.feed-section.feed-open.collapsed {
+  transform: translateY(calc(100% + 20px)) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .feed-section .feed-label {
