@@ -637,14 +637,105 @@ body::before {
   filter: blur(60px);
 }
 
-/* Feed section atmospheric elements */
-.feed-section {
-  position: relative;
-}
-
-/* Mood section polish */
+/* ── FEED & MOOD ATMOSPHERIC TREATMENT ── */
+/* Wrap the entire content area in warmth so it doesn't feel flat */
 .mood-section {
   position: relative;
+  margin-bottom: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(250,246,239,0.6) 0%, rgba(245,235,220,0.4) 100%);
+  border: 1px solid rgba(212,105,62,0.08);
+  box-shadow: 0 2px 24px rgba(212,105,62,0.04), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.mood-section::before {
+  content: 'How\'s your vibe?';
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+  text-align: center;
+}
+
+.mood-card {
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,0.7) !important;
+  border-color: rgba(212,105,62,0.1) !important;
+}
+
+[data-theme="dark"] .mood-section {
+  background: linear-gradient(135deg, rgba(30,22,15,0.6) 0%, rgba(40,28,18,0.4) 100%);
+  border-color: rgba(212,105,62,0.12);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+[data-theme="dark"] .mood-card {
+  background: rgba(40,30,20,0.7) !important;
+  border-color: rgba(212,105,62,0.15) !important;
+}
+
+/* Feed section — warm wrapper with subtle depth */
+.feed-section {
+  position: relative;
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, rgba(250,246,239,0.3) 0%, rgba(245,235,220,0.15) 100%);
+  border: 1px solid rgba(212,105,62,0.06);
+}
+
+.feed-section::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(212,105,62,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .feed-section {
+  background: linear-gradient(180deg, rgba(30,22,15,0.3) 0%, rgba(20,14,8,0.15) 100%);
+  border-color: rgba(212,105,62,0.08);
+}
+
+/* Make message cards warmer */
+.message-card {
+  backdrop-filter: blur(4px);
+}
+
+.message-card.own .message-bubble {
+  background: linear-gradient(135deg, rgba(250,246,239,0.95), rgba(245,235,220,0.9)) !important;
+  border: 1px solid rgba(212,105,62,0.12);
+}
+
+[data-theme="dark"] .message-card.own .message-bubble {
+  background: linear-gradient(135deg, rgba(50,35,22,0.95), rgba(40,28,18,0.9)) !important;
+  border-color: rgba(212,105,62,0.18);
+}
+
+/* Daily Spark inline card warmth */
+.daily-spark-inline {
+  background: linear-gradient(135deg, rgba(212,105,62,0.06), rgba(250,246,239,0.8)) !important;
+  border: 1px solid rgba(212,105,62,0.1) !important;
+  border-radius: var(--radius-xl) !important;
+  padding: var(--space-3) var(--space-4) !important;
+}
+
+[data-theme="dark"] .daily-spark-inline {
+  background: linear-gradient(135deg, rgba(212,105,62,0.08), rgba(30,22,15,0.8)) !important;
+  border-color: rgba(212,105,62,0.15) !important;
+}
+
+/* Remove excess gap before feed */
+.feed-section.vine-border {
+  margin-top: 0;
 }
 
 /* Section-specific atmosphere colors */
