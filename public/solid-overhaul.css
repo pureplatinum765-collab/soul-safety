@@ -1,0 +1,562 @@
+/* ============================================================
+   SOLID OVERHAUL — Kill jello, add structure
+   This file overrides all wobbly/bouncy CSS from other files.
+   ============================================================ */
+
+/* ── KILL THE JELLO ─────────────────────────────────────────── */
+
+/* Override ALL spring/elastic transitions with crisp linear or ease */
+:root {
+  --t-spring: 200ms ease !important;
+  --ease-spring: ease !important;
+}
+
+/* Remove floating orbs, disco shimmer, custom cursor — they add nothing */
+.float-orb,
+.disco-shimmer,
+.cursor-ring,
+.cursor-dot {
+  display: none !important;
+}
+
+/* Kill the polaroid system — it makes the page feel cluttered and wobbly */
+.polaroid-layer {
+  display: none !important;
+}
+
+/* Kill ambient canvas background noise */
+.ambient-canvas {
+  display: none !important;
+}
+
+/* No more body cursor override */
+body {
+  cursor: auto !important;
+}
+
+/* All buttons: crisp, no overshoot easing */
+.btn, .btn-primary, .btn-enter, .send-btn,
+.voice-btn, .photo-btn, .action-btn,
+.curiosity-card, .mood-emoji-btn,
+.reaction-pill, .reaction-btn, .polaroid,
+.penguin-btn, .nav-tab, button {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease !important;
+}
+
+.btn:hover, .btn-primary:hover, .btn-enter:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+}
+
+.btn:active, .btn-primary:active, .btn-enter:active {
+  transform: translateY(0) scale(0.98) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+}
+
+.curiosity-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+}
+
+.curiosity-card:active {
+  transform: translateY(0) !important;
+}
+
+.mood-emoji-btn:hover {
+  transform: scale(1.15) !important;
+}
+
+.mood-emoji-btn:active {
+  transform: scale(1.05) !important;
+}
+
+.reaction-pill:hover, .reaction-btn:hover {
+  transform: scale(1.08) !important;
+}
+
+/* Kill the constellation canvas too */
+.constellation-layer {
+  display: none !important;
+}
+
+/* ── PAGE STRUCTURE — Solid, not floating ───────────────────── */
+
+/* Hero: keep it clean, remove excessive depth effects */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-overlay {
+  pointer-events: none;
+}
+
+/* Hero title: clean glow, no shimmer animation */
+.hero-title.shimmer-text {
+  animation: none !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  color: var(--color-primary) !important;
+  text-shadow: 0 0 60px rgba(197, 92, 52, 0.15);
+}
+
+/* ── CHAT PANEL — Sleek drawer, not giant page section ────── */
+
+.feed-section {
+  position: fixed;
+  bottom: 72px;
+  right: 16px;
+  width: 380px;
+  max-height: 520px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.06);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  margin: 0;
+}
+
+.feed-section.collapsed {
+  transform: translateY(calc(100% + 20px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feed-section .feed-label {
+  padding: 14px 16px;
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface-raised);
+  border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
+}
+
+.feed-section .feed-label::after {
+  content: '−';
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  flex: unset;
+  height: auto;
+  background: none;
+}
+
+.feed-section.collapsed .feed-label::after {
+  content: '+';
+}
+
+#feedContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* Feed toggle button */
+.feed-toggle-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 16px rgba(197, 92, 52, 0.3);
+  cursor: pointer;
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.feed-toggle-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(197, 92, 52, 0.4) !important;
+}
+
+.feed-toggle-btn.hidden {
+  display: none;
+}
+
+/* Message card cleanup — tighter, no big animations */
+.message-card {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ── INPUT BAR — Tighter, no wobble ─────────────────────────── */
+.input-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: 8px 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+.input-bar-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-text-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 4px 4px 4px 14px;
+  transition: border-color 0.15s ease;
+}
+
+.input-text-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+.input-text {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 8px 0 !important;
+  resize: none;
+}
+
+/* ── STICKY NOTES PINBOARD — Real inline notes ──────────────── */
+
+.pinboard-notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sticky-note {
+  background: #fef9c3;
+  border: 1px solid #e5d89c;
+  border-radius: 3px;
+  padding: 14px 12px;
+  min-height: 100px;
+  position: relative;
+  box-shadow: 1px 2px 6px rgba(0,0,0,0.06);
+  transition: box-shadow 0.15s ease;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #4a3f2f;
+}
+
+.sticky-note:hover {
+  box-shadow: 2px 4px 12px rgba(0,0,0,0.1);
+}
+
+.sticky-note .note-author {
+  font-family: 'General Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8a7d6b;
+  margin-top: 8px;
+}
+
+.sticky-note--raphael {
+  background: #fff4e8;
+  border-color: #e8d5be;
+}
+
+.sticky-note--taylor {
+  background: #e8f5e9;
+  border-color: #c3dfc5;
+}
+
+.sticky-note textarea {
+  width: 100%;
+  height: 80px;
+  border: none;
+  background: transparent;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #4a3f2f;
+  resize: none;
+  outline: none;
+}
+
+.add-note-btn {
+  width: 100%;
+  min-height: 80px;
+  border: 2px dashed var(--color-border);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.add-note-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Dark mode sticky notes */
+[data-theme="dark"] .sticky-note {
+  background: #2a2520;
+  border-color: #3d3530;
+  color: #d4c8b8;
+}
+
+[data-theme="dark"] .sticky-note--raphael {
+  background: #2d2418;
+  border-color: #3d3525;
+}
+
+[data-theme="dark"] .sticky-note--taylor {
+  background: #1e2b1f;
+  border-color: #2d3d2e;
+}
+
+[data-theme="dark"] .sticky-note .note-author {
+  color: #9a8e7c;
+}
+
+[data-theme="dark"] .sticky-note textarea {
+  color: #d4c8b8;
+}
+
+/* ── BOARD GAME — Cleaner frame ─────────────────────────────── */
+
+.game-section {
+  margin: 0 auto;
+  max-width: var(--content-default);
+  padding: var(--space-4);
+}
+
+.game-section__inner {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+.wander-canvas-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.wander-controls {
+  padding: 12px;
+}
+
+.btn-game--primary {
+  border-radius: 12px !important;
+  font-weight: 600;
+}
+
+.btn-game--secondary {
+  border-radius: 12px !important;
+}
+
+/* ── CURIOSITY SHOP — Clean card grid ───────────────────────── */
+
+.curiosity-shop {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  margin: var(--space-4) auto;
+  max-width: var(--content-default);
+  overflow: hidden;
+}
+
+.curiosity-shop__inner {
+  padding: var(--space-5);
+}
+
+.curiosity-shop__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.curiosity-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* ── MILANOTE / PINBOARD SECTION — Solid card ───────────────── */
+
+.milanote-section {
+  margin: var(--space-4) auto;
+  max-width: var(--content-default);
+}
+
+.milanote-section__inner {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: var(--space-5);
+}
+
+/* ── MOOD SECTION — Lock in ─────────────────────────────────── */
+
+.mood-section {
+  max-width: var(--content-default);
+  margin: var(--space-4) auto;
+}
+
+.mood-card {
+  transition: box-shadow 0.15s ease, border-color 0.15s ease !important;
+}
+
+.mood-card:hover {
+  transform: none !important;
+}
+
+/* ── DAILY SPARK — Clean inline ─────────────────────────────── */
+
+.daily-spark-inline {
+  max-width: var(--content-default);
+  margin: var(--space-4) auto;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: var(--space-4);
+}
+
+/* ── MAIN CONTENT — Breathing room ──────────────────────────── */
+
+.main-content {
+  padding-bottom: 80px;
+}
+
+/* ── SCROLL PROGRESS — Thinner, subtle ──────────────────────── */
+
+.scroll-progress {
+  height: 2px !important;
+  opacity: 0.6;
+}
+
+/* ── PENGUIN — Clean circle, no bounce ──────────────────────── */
+
+.penguin-btn {
+  transition: transform 0.15s ease !important;
+}
+
+.penguin-btn:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Penguin panel: solid, clean card */
+.penguin-panel {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15) !important;
+}
+
+/* ── FACTOIDS — Solid sidebar, not floating randomly ────────── */
+
+.factoid-layer {
+  display: none !important;
+}
+
+.factoid-add-btn {
+  display: none !important;
+}
+
+/* ── VINE BORDERS — Remove decorative clutter ───────────────── */
+
+.vine-border::before,
+.vine-border::after {
+  display: none !important;
+}
+
+/* ── SECTION WASH BACKGROUND IMAGES — Remove ────────────────── */
+
+.section-wash {
+  display: none !important;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .feed-section {
+    right: 0;
+    left: 0;
+    bottom: 60px;
+    width: auto;
+    max-height: 60vh;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+  }
+
+  .feed-toggle-btn {
+    bottom: 68px;
+    right: 12px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .curiosity-shop__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .pinboard-notes {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mood-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── DARK MODE feed panel ───────────────────────────────────── */
+
+[data-theme="dark"] .feed-section {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+
+[data-theme="dark"] .feed-section .feed-label {
+  background: var(--color-surface-raised);
+  border-bottom-color: var(--color-border);
+}
