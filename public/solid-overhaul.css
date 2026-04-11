@@ -107,11 +107,12 @@ body {
 /* ── CHAT PANEL — Sleek drawer, not giant page section ────── */
 
 .feed-section {
-  position: fixed;
-  bottom: 72px;
-  right: 16px;
-  width: 380px;
-  max-height: 520px;
+  position: fixed !important;
+  bottom: 72px !important;
+  right: 16px !important;
+  left: auto !important;
+  width: 380px !important;
+  max-height: 520px !important;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 16px;
@@ -120,8 +121,9 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-  margin: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .feed-section.collapsed {
@@ -518,13 +520,13 @@ body {
 
 @media (max-width: 640px) {
   .feed-section {
-    right: 0;
-    left: 0;
-    bottom: 60px;
-    width: auto;
-    max-height: 60vh;
-    border-radius: 16px 16px 0 0;
-    margin: 0;
+    right: 0 !important;
+    left: 0 !important;
+    bottom: 60px !important;
+    width: auto !important;
+    max-height: 60vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin: 0 !important;
   }
 
   .feed-toggle-btn {
