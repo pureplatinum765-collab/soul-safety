@@ -212,7 +212,7 @@
         overlay.remove();
       }, 400);
     }
-    sessionStorage.setItem(BLOOM_KEY, '1');
+    localStorage.setItem(BLOOM_KEY, '1');
   }
 
   // Skip on tap/click
@@ -224,7 +224,7 @@
   // Initialize
   function init() {
     // Only show bloom once per session
-    if (sessionStorage.getItem(BLOOM_KEY)) {
+    if (localStorage.getItem(BLOOM_KEY)) {
       const overlay = document.getElementById('bloomOverlay');
       if (overlay) { overlay.style.display = 'none'; overlay.remove(); }
       return;

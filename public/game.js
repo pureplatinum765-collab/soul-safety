@@ -112,17 +112,19 @@
   }
 
   /* ── 3. THREE.JS SCENE INIT ──────────────────────────── */
-  var THREE = window.THREE;
-  if (!THREE) {
-    console.error('[WanderingPath3D] THREE.js not found on window');
-    return;
-  }
+  var THREE; // set from window.THREE after deferred script loads
 
   /* Wait for DOM before init */
   function init() {
     var gameSection = document.getElementById('gameSection');
     var canvasWrap  = document.querySelector('.wander-canvas-wrap');
     if (!canvasWrap) return;
+
+    THREE = window.THREE;
+    if (!THREE) {
+      console.error('[WanderingPath3D] THREE.js not loaded');
+      return;
+    }
 
     /* Remove old canvas element */
     var oldCanvas = document.getElementById('wanderingCanvas');
