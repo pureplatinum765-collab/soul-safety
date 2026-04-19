@@ -24,9 +24,12 @@
   }
 
   // Kill magnetic button effects from both immersive.js and scroll-fx.js
-  // by removing their mousemove listeners on magnetic targets
+  // by removing their mousemove listeners on magnetic targets.
+  // IMPORTANT: Exclude game controls (#wanderRollBtn, #wanderResetBtn, etc.)
+  // because game.js attaches click handlers that would be lost on clone.
   var magneticBtns = document.querySelectorAll('.btn-enter, .btn-primary, .btn-game--primary');
   magneticBtns.forEach(function(btn) {
+    if (btn.closest('.wander-controls') || btn.closest('.wander-actions')) return;
     var clone = btn.cloneNode(true);
     if (btn.parentNode) {
       btn.parentNode.replaceChild(clone, btn);
