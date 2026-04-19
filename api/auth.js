@@ -7,9 +7,13 @@ import { json, uuid, nowTs, hashPassword, buildSessionCookie, safeJson, ensureGa
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  // Extract sub-path: req.url might be /api/auth/login or just /api/auth
+  // Extract sub-path: req.url might be /api/auth/login, /api/verify-pin (rewrite), or just /api/auth
   const url = req.url || "";
-  const subpath = url.replace(/^\/api\/auth\/?/, "").split("?")[0]; // login, logout, me, signup
+  let subpath = url.replace(/^\/api\/auth\/?/, "").split("?")[0]; // login, logout, me, signup, verify-pin
+  // Handle rewrites: /api/verify-pin → auth handler, extract 'verify-pin' from /api/verify-pin
+  if (subpath === url || subpath.startsWith("api/")) {
+    subpath = url.replace(/^\/api\//, "").split("?")[0];
+  }
 
   // --- GET /api/auth/me ---
   if (subpath === "me" || subpath === "") {
