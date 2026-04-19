@@ -333,13 +333,19 @@
 
   // Pause when hero not visible
   var heroObserver = new IntersectionObserver(function (entries) {
+    var wasP = paused;
     paused = !entries[0].isIntersecting;
+    // Restart RAF loop when becoming visible again
+    if (wasP && !paused) requestAnimationFrame(animate);
   }, { threshold: 0.05 });
   heroObserver.observe(heroEl);
 
   function animate() {
+    if (paused) {
+      // Don't re-queue RAF when paused — observer will restart
+      return;
+    }
     requestAnimationFrame(animate);
-    if (paused) return;
 
     var elapsed = (performance.now() - startTime) * 0.001;
 

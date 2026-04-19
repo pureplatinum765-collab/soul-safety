@@ -803,7 +803,7 @@ function renderMessage(msg, index) {
             <button class="voice-play-btn" onclick="playAudio(this, '${msg.id}')" aria-label="Play voice note">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </button>
-            <div class="voice-waveform" id="waveform-${msg.id}">${generateWaveformBars()}</div>
+            <div class="voice-waveform" id="waveform-${msg.id}">${generateWaveformBars(msg.id)}</div>
             <span class="voice-duration">${msg.duration || '0:05'}</span>
           </div>
           <audio id="audio-${msg.id}" src="${mediaUrl}" preload="metadata"></audio>
@@ -953,10 +953,16 @@ async function toggleReaction(messageId, emoji) {
   }
 }
 
-function generateWaveformBars() {
+function generateWaveformBars(seed) {
+  // Seeded pseudo-random so bars stay stable across re-renders
+  let s = seed || 1;
+  function seededRandom() {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  }
   let bars = '';
   for (let i = 0; i < 30; i++) {
-    const height = 4 + Math.random() * 24;
+    const height = 4 + seededRandom() * 24;
     bars += `<div class="voice-bar" style="height:${height}px"></div>`;
   }
   return bars;

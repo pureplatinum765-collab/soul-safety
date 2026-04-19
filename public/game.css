@@ -468,63 +468,6 @@
   border: 1px solid var(--game-border);
 }
 
-/* ── Toast ───────────────────────────────────────────── */
-.game-toast {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%) translateY(14px);
-  background: #fff;
-  color: var(--game-brown);
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--game-radius-pill);
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: var(--font-body);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.14);
-  border: 1.5px solid rgba(194, 98, 58, 0.22);
-  opacity: 0;
-  transition: opacity 0.28s ease, transform 0.28s ease;
-  z-index: 9999;
-  pointer-events: none;
-  max-width: min(400px, 90vw);
-  text-align: center;
-}
-
-.toast-visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* ── Pinboard / Links ────────────────────────────────── */
-.pinboard-desc {
-  font-size: 0.88rem;
-  opacity: 0.65;
-  margin-top: 0.25rem;
-  margin-bottom: 0.75rem;
-}
-
-.pinboard-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--game-radius-sm);
-  border: 1.5px solid var(--game-terracotta-mid);
-  background: var(--game-terracotta-light);
-  color: inherit;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: var(--font-body);
-  transition: background var(--transition), transform var(--transition);
-}
-
-.pinboard-link:hover {
-  background: rgba(194, 98, 58, 0.18);
-  transform: translateY(-1px);
-}
-
 /* ── Challenge / Minigame Banner ─────────────────────── */
 .challenge-banner {
   margin-top: 0.75rem;
@@ -631,11 +574,6 @@
   color: rgba(250, 246, 239, 0.6);
 }
 
-[data-theme="dark"] .game-toast {
-  background: rgba(30, 18, 12, 0.97);
-  border-color: rgba(194, 98, 58, 0.3);
-  color: #faf6ef;
-}
 
 [data-theme="dark"] .turn-yours {
   background: linear-gradient(135deg, rgba(194, 98, 58, 0.2), rgba(218, 165, 32, 0.1));
@@ -663,4 +601,679 @@
 
 [data-theme="dark"] .btn-game--secondary:hover:not(.btn-disabled) {
   background: rgba(255, 255, 255, 0.09);
+}
+
+/* ========================================================
+   THE WANDERING PATH v3 — NEW ELEMENT STYLES
+   Additions: inventory slots, item buttons, fork modal,
+   challenge modal, crystal peek, spark picker, path badges
+======================================================== */
+
+/* ── Inventory Slots ─────────────────────────────────── */
+.inv-slots {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.35rem;
+}
+
+.inv-slot {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--game-radius-sm);
+  border: 1.5px solid var(--game-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+}
+
+.inv-slot--empty {
+  background: rgba(61, 36, 22, 0.03);
+  border-style: dashed;
+  opacity: 0.4;
+}
+
+.inv-slot--filled {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.14), rgba(194, 98, 58, 0.1));
+  border-color: rgba(218, 165, 32, 0.4);
+  cursor: help;
+  box-shadow: 0 1px 6px rgba(218, 165, 32, 0.15);
+}
+
+.inv-slot--filled:hover {
+  transform: scale(1.15) translateY(-1px);
+  border-color: var(--game-amber);
+  box-shadow: 0 3px 12px rgba(218, 165, 32, 0.3);
+}
+
+/* ── Player card path/shield badges ─────────────────── */
+.wpc-path {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--game-radius-pill);
+  background: rgba(139, 158, 183, 0.18);
+  color: #5a7088;
+  border: 1px solid rgba(139, 158, 183, 0.3);
+}
+
+.wpc-shield {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--game-radius-pill);
+  background: rgba(107, 142, 95, 0.15);
+  color: var(--game-sage);
+  border: 1px solid rgba(107, 142, 95, 0.3);
+  animation: shieldPulse 2s ease infinite;
+}
+
+@keyframes shieldPulse {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 8px rgba(107, 142, 95, 0.4); }
+}
+
+/* ── Item Use Button Area ────────────────────────────── */
+.wander-item-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  min-height: 0;
+  padding: 0;
+  transition: min-height 0.2s ease;
+}
+
+.wander-item-actions:not(:empty) {
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--game-radius);
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.07), rgba(194, 98, 58, 0.04));
+  border: 1.5px solid rgba(218, 165, 32, 0.2);
+}
+
+.item-use-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--game-brown);
+  opacity: 0.55;
+  font-family: var(--font-body);
+  width: 100%;
+}
+
+.btn-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--game-radius-pill);
+  border: 1.5px solid rgba(218, 165, 32, 0.4);
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.12), rgba(194, 98, 58, 0.06));
+  color: var(--game-brown);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+}
+
+.btn-item:hover {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.22), rgba(194, 98, 58, 0.12));
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(218, 165, 32, 0.22);
+  border-color: var(--game-amber);
+}
+
+.btn-item:active {
+  transform: scale(0.95);
+}
+
+/* ── Spark Roll Picker ───────────────────────────────── */
+.wander-spark-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--game-radius);
+  background: linear-gradient(135deg, rgba(102, 0, 255, 0.07), rgba(194, 98, 58, 0.04));
+  border: 1.5px solid rgba(102, 0, 255, 0.22);
+  animation: sparkGlow 1.5s ease infinite;
+}
+
+@keyframes sparkGlow {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 20px rgba(102, 0, 255, 0.15); }
+}
+
+.spark-info {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  color: var(--game-brown);
+  opacity: 0.75;
+}
+
+.spark-rolls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-spark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.88rem;
+  font-weight: 800;
+  font-family: var(--font-body);
+  padding: 0.5rem 1rem;
+  border-radius: var(--game-radius);
+  border: 1.5px solid rgba(102, 0, 255, 0.35);
+  background: linear-gradient(135deg, rgba(102, 0, 255, 0.12), rgba(218, 165, 32, 0.08));
+  color: var(--game-brown);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  min-width: 88px;
+}
+
+.btn-spark:hover {
+  background: linear-gradient(135deg, rgba(102, 0, 255, 0.22), rgba(218, 165, 32, 0.14));
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 16px rgba(102, 0, 255, 0.2);
+}
+
+.btn-spark:active {
+  transform: scale(0.95);
+}
+
+/* ── Modal Overlays (Fork + Challenge) ───────────────── */
+.wander-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(6, 3, 24, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.wander-modal-overlay.modal-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Modal inner content box */
+.wander-modal-overlay .modal-title,
+.wander-modal-overlay .modal-text,
+.wander-modal-overlay .modal-detail,
+.wander-modal-overlay .modal-choices {
+  /* These are written directly into the overlay by game.js */
+}
+
+/* Make the injected content act as a card */
+.wander-modal-overlay > *:first-child {
+  /* game.js injects children directly; wrap with a pseudo-container via CSS grid trick */
+}
+
+.wander-modal-overlay {
+  /* Layout injected content in a centred card */
+}
+
+/* Because game.js injects raw children into the overlay, we style the direct
+   block-level children to form a card. */
+.wander-modal-overlay .modal-title {
+  font-size: clamp(1.1rem, 3vw, 1.45rem);
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--game-brown);
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+}
+
+.wander-modal-overlay .modal-text {
+  font-size: 0.95rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--game-brown);
+  opacity: 0.85;
+  margin-bottom: 0.3rem;
+  line-height: 1.5;
+}
+
+.wander-modal-overlay .modal-detail {
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  color: var(--game-brown);
+  opacity: 0.65;
+  margin-bottom: 1.1rem;
+  line-height: 1.5;
+  padding: 0.45rem 0.65rem;
+  background: rgba(61, 36, 22, 0.05);
+  border-radius: var(--game-radius-sm);
+  border-left: 3px solid rgba(194, 98, 58, 0.3);
+}
+
+/* The overlay acts as a flex column card */
+.wander-modal-overlay {
+  flex-direction: column;
+  align-items: stretch;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Offset the overlay to appear as a centred card */
+.wander-modal-overlay.modal-visible {
+  background: transparent; /* The card below handles bg */
+}
+
+/* Since we can't nest easily without another div, we use a creative approach:
+   the modal overlay IS the backdrop, and game.js injects all content as siblings.
+   We wrap with a CSS grid to create a card-like appearance. */
+.wander-modal-overlay {
+  background: rgba(6, 3, 24, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  /* Inner card styles on the injected content wrapper */
+}
+
+/* game.js wraps content in a div.modal-card injected into the overlay */
+/* We also apply styles to the raw first div child fallback */
+
+/* Targeting injected modal content as a card */
+.wander-modal-overlay > div,
+.wander-modal-overlay > form {
+  background: var(--game-surface, #fff);
+  border-radius: 14px;
+  padding: 1.6rem 1.75rem;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.35), 0 2px 0 rgba(255,255,255,0.05) inset;
+  border: 1px solid var(--game-border);
+  max-width: 440px;
+  width: 100%;
+  animation: modalSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Modal choices row */
+.modal-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modal-choices--fork {
+  flex-direction: row;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Challenge choice buttons */
+.btn-challenge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--game-radius);
+  border: 1.5px solid rgba(194, 98, 58, 0.3);
+  background: linear-gradient(135deg, rgba(194, 98, 58, 0.07), rgba(218, 165, 32, 0.05));
+  color: var(--game-brown);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  text-align: center;
+}
+
+.btn-challenge:hover:not(.btn-disabled):not(:disabled) {
+  background: linear-gradient(135deg, rgba(194, 98, 58, 0.16), rgba(218, 165, 32, 0.1));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(194, 98, 58, 0.18);
+  border-color: var(--game-terracotta);
+}
+
+.btn-challenge:active:not(.btn-disabled):not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Fork choice buttons */
+.btn-fork {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 0.8rem;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.btn-fork--mountain {
+  background: linear-gradient(145deg, rgba(139, 158, 183, 0.14), rgba(100, 120, 145, 0.08));
+  border-color: rgba(139, 158, 183, 0.35);
+  color: #3a4f6a;
+}
+
+.btn-fork--mountain:hover {
+  background: linear-gradient(145deg, rgba(139, 158, 183, 0.26), rgba(100, 120, 145, 0.16));
+  border-color: #8b9eb7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(139, 158, 183, 0.25);
+}
+
+.btn-fork--forest {
+  background: linear-gradient(145deg, rgba(45, 92, 35, 0.12), rgba(90, 158, 74, 0.08));
+  border-color: rgba(45, 92, 35, 0.3);
+  color: #1e4d18;
+}
+
+.btn-fork--forest:hover {
+  background: linear-gradient(145deg, rgba(45, 92, 35, 0.22), rgba(90, 158, 74, 0.14));
+  border-color: #2d5c23;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(45, 92, 35, 0.2);
+}
+
+.fork-icon {
+  font-size: 2rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.1));
+}
+
+.fork-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  margin-top: 0.1rem;
+}
+
+.fork-desc {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  font-weight: 500;
+  line-height: 1.35;
+  max-width: 160px;
+}
+
+/* ── Crystal Peek Overlay ────────────────────────────── */
+.wander-peek-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(6, 3, 24, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.wander-peek-overlay.peek-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.wander-peek-overlay > * {
+  background: var(--game-surface, #fff);
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 16px 60px rgba(0,0,0,0.35);
+  border: 1px solid var(--game-border);
+  max-width: 420px;
+  width: 100%;
+  animation: modalSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.peek-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--game-brown);
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--game-border);
+}
+
+.peek-tiles {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.peek-tile {
+  flex: 1;
+  min-width: 90px;
+  max-width: 115px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.6rem 0.4rem;
+  border-radius: var(--game-radius);
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.08), rgba(194, 98, 58, 0.05));
+  border: 1.5px solid rgba(218, 165, 32, 0.2);
+}
+
+.peek-num {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  font-family: var(--font-body);
+}
+
+.peek-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.peek-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--game-brown);
+  opacity: 0.75;
+  text-align: center;
+}
+
+/* ── Legend updates ──────────────────────────────────── */
+.legend-item--fork      { border-color: rgba(255, 215, 0, 0.35);       background: rgba(255, 215, 0, 0.06); }
+.legend-item--item      { border-color: rgba(232, 168, 76, 0.35);       background: rgba(232, 168, 76, 0.06); }
+.legend-item--challenge { border-color: rgba(224, 90, 90, 0.32);        background: rgba(224, 90, 90, 0.06); }
+.legend-item--rest      { border-color: rgba(255, 138, 101, 0.35);      background: rgba(255, 138, 101, 0.06); }
+.legend-item--warp      { border-color: rgba(156, 39, 176, 0.3);        background: rgba(156, 39, 176, 0.06); }
+.legend-item--trap      { border-color: rgba(204, 51, 51, 0.3);         background: rgba(204, 51, 51, 0.06); }
+.legend-item--story     { border-color: rgba(123, 156, 222, 0.35);      background: rgba(123, 156, 222, 0.06); }
+.legend-item--inv       { border-color: rgba(218, 165, 32, 0.35);       background: rgba(218, 165, 32, 0.06); opacity: 0.6; }
+
+/* ── Responsive additions ────────────────────────────── */
+@media (max-width: 640px) {
+  .modal-choices--fork {
+    flex-direction: column;
+  }
+
+  .btn-fork {
+    min-width: unset;
+  }
+
+  .wander-peek-overlay > * {
+    padding: 1.1rem 1.1rem;
+  }
+
+  .peek-tiles {
+    gap: 0.4rem;
+  }
+
+  .wander-modal-overlay > div,
+  .wander-modal-overlay > form {
+    padding: 1.2rem 1.1rem;
+    border-radius: 12px;
+  }
+
+  .wander-item-actions {
+    gap: 0.3rem;
+  }
+
+  .btn-item {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+  }
+}
+
+/* ── Dark mode additions ─────────────────────────────── */
+[data-theme="dark"] .inv-slot--empty {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .inv-slot--filled {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.15), rgba(194, 98, 58, 0.1));
+  border-color: rgba(218, 165, 32, 0.4);
+}
+
+[data-theme="dark"] .wander-item-actions:not(:empty) {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.08), rgba(194, 98, 58, 0.05));
+  border-color: rgba(218, 165, 32, 0.2);
+}
+
+[data-theme="dark"] .item-use-label {
+  color: rgba(250, 246, 239, 0.5);
+}
+
+[data-theme="dark"] .btn-item {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.14), rgba(194, 98, 58, 0.08));
+  border-color: rgba(218, 165, 32, 0.3);
+  color: rgba(250, 246, 239, 0.85);
+}
+
+[data-theme="dark"] .btn-item:hover {
+  background: linear-gradient(135deg, rgba(218, 165, 32, 0.24), rgba(194, 98, 58, 0.14));
+}
+
+[data-theme="dark"] .wander-modal-overlay > div,
+[data-theme="dark"] .wander-modal-overlay > form {
+  background: #1e1512;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .wander-peek-overlay > * {
+  background: #1e1512;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] .modal-text {
+  color: #faf6ef;
+}
+
+[data-theme="dark"] .modal-detail {
+  color: rgba(250, 246, 239, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .btn-challenge {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(194, 98, 58, 0.25);
+  color: rgba(250, 246, 239, 0.85);
+}
+
+[data-theme="dark"] .btn-challenge:hover:not(.btn-disabled):not(:disabled) {
+  background: rgba(194, 98, 58, 0.14);
+}
+
+[data-theme="dark"] .btn-fork--mountain {
+  background: rgba(139, 158, 183, 0.12);
+  border-color: rgba(139, 158, 183, 0.3);
+  color: rgba(180, 200, 220, 0.9);
+}
+
+[data-theme="dark"] .btn-fork--mountain:hover {
+  background: rgba(139, 158, 183, 0.22);
+}
+
+[data-theme="dark"] .btn-fork--forest {
+  background: rgba(45, 92, 35, 0.12);
+  border-color: rgba(90, 158, 74, 0.3);
+  color: rgba(150, 220, 130, 0.9);
+}
+
+[data-theme="dark"] .btn-fork--forest:hover {
+  background: rgba(45, 92, 35, 0.22);
+}
+
+[data-theme="dark"] .peek-title {
+  color: #faf6ef;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .peek-tile {
+  background: rgba(218, 165, 32, 0.08);
+  border-color: rgba(218, 165, 32, 0.18);
+}
+
+[data-theme="dark"] .peek-name {
+  color: rgba(250, 246, 239, 0.7);
+}
+
+[data-theme="dark"] .wpc-path {
+  background: rgba(139, 158, 183, 0.14);
+  color: rgba(180, 200, 220, 0.85);
+  border-color: rgba(139, 158, 183, 0.2);
+}
+
+[data-theme="dark"] .wpc-shield {
+  background: rgba(107, 142, 95, 0.14);
+  color: #8aac7e;
+  border-color: rgba(107, 142, 95, 0.25);
+}
+
+[data-theme="dark"] .btn-spark {
+  background: rgba(102, 0, 255, 0.12);
+  border-color: rgba(102, 0, 255, 0.3);
+  color: rgba(250, 246, 239, 0.85);
+}
+
+[data-theme="dark"] .btn-spark:hover {
+  background: rgba(102, 0, 255, 0.22);
+}
+
+[data-theme="dark"] .wander-spark-wrap {
+  background: rgba(102, 0, 255, 0.08);
+  border-color: rgba(102, 0, 255, 0.2);
+}
+
+[data-theme="dark"] .spark-info {
+  color: rgba(250, 246, 239, 0.65);
 }

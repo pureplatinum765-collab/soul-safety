@@ -5,12 +5,12 @@
 (function () {
   'use strict';
 
-  // ── Smooth scroll (Lenis) ──────────────────────────────────────────────
+  // ── Smooth scroll (Lenis) — disabled: solid-overhaul.js removes Lenis classes
+  // Keeping reference for potential future use but NOT starting the RAF loop
   let lenis;
   if (window.Lenis) {
     lenis = new Lenis({ lerp: 0.08, smoothWheel: true, syncTouch: false });
-    function rafLoop(time) { lenis.raf(time); requestAnimationFrame(rafLoop); }
-    requestAnimationFrame(rafLoop);
+    // RAF loop intentionally NOT started — was running as zombie consuming frames
   }
 
   // ── Scroll progress bar ───────────────────────────────────────────────

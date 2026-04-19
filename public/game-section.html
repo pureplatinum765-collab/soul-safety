@@ -1,5 +1,7 @@
 <!-- 
-  THE WANDERING PATH — Game Section HTML
+  THE WANDERING PATH v3 — Strategic Edition
+  Game Section HTML for Soul Safety (Raphael & Taylor)
+  
   Replace the existing <section class="game-section" id="gameSection"> ... </section>
   with this block in index.html.
   
@@ -22,7 +24,7 @@
       <div class="wander-canvas-wrap">
         <canvas id="wanderingCanvas" aria-label="The Wandering Path game board" role="img"></canvas>
 
-        <!-- Win celebration overlay (inside canvas wrap, positioned absolute) -->
+        <!-- Win celebration overlay -->
         <div class="wander-win-overlay" id="wanderWinOverlay" aria-live="polite">
           <div class="win-title">Enlightenment Reached!</div>
           <div class="win-name"></div>
@@ -30,9 +32,9 @@
         </div>
       </div>
 
-      <!-- Player info cards -->
+      <!-- Player info cards (inventory rendered by game.js) -->
       <div class="wander-players" id="wanderingPlayers">
-        <!-- Rendered by game.js -->
+        <!-- Rendered by game.js; includes inventory slots -->
       </div>
 
       <!-- Narrative text -->
@@ -40,10 +42,15 @@
         <p class="wander-narrative" id="wanderNarrative">The wandering path awaits...</p>
       </div>
 
-      <!-- Controls: dice + buttons -->
+      <!-- Item use buttons (shown during your turn, before rolling) -->
+      <div class="wander-item-actions" id="wanderItemBtnArea" aria-live="polite">
+        <!-- Rendered by game.js when it's your turn and you have items -->
+      </div>
+
+      <!-- Controls: dice + roll/reset buttons -->
       <div class="wander-controls">
         <div class="wander-dice-area">
-          <div class="wander-dice" id="wanderDice" aria-live="polite" aria-label="Dice"></div>
+          <div class="wander-dice" id="wanderDice" aria-live="polite" aria-label="Dice result"></div>
         </div>
         <div class="wander-actions">
           <button type="button" class="btn-game btn-game--primary" id="wanderRollBtn">
@@ -55,16 +62,41 @@
         </div>
       </div>
 
+      <!-- Spark "roll again" picker (shown after Spark item activates) -->
+      <div class="wander-spark-wrap" id="wanderSparkBtnWrap" style="display:none;" aria-live="polite">
+        <!-- Rendered by game.js -->
+      </div>
+
       <!-- Legend -->
       <div class="wander-legend">
-        <span class="legend-item">⭐ Bonus +2 spaces</span>
-        <span class="legend-item">🌀 Slip back 2</span>
-        <span class="legend-item">☕ Rest stop</span>
-        <span class="legend-item">🏁 Finish line</span>
-        <span class="legend-item">🌸 Meadow · 🌲 Forest · ⛰️ Mountain · ✨ Starfield</span>
+        <span class="legend-item legend-item--fork">🔱 Fork — choose path</span>
+        <span class="legend-item legend-item--item">🍄 Item — collect treasure</span>
+        <span class="legend-item legend-item--challenge">⚔️ Challenge — face a choice</span>
+        <span class="legend-item legend-item--rest">☕ Rest — skip next hazard</span>
+        <span class="legend-item legend-item--warp">🌀 Warp — teleport forward</span>
+        <span class="legend-item legend-item--trap">💀 Trap — back 1-3 tiles</span>
+        <span class="legend-item legend-item--story">📖 Story — narrative moment</span>
+        <span class="legend-item">🏁 Finish — enlightenment!</span>
+        <span class="legend-item legend-item--inv">Items: 🌿 Herb · ⚡ Spark · 🔮 Crystal (max 3)</span>
       </div>
 
     </div><!-- /.wander-layout -->
+
+    <!-- ═══ FORK CHOICE MODAL ═══════════════════════════════ -->
+    <div class="wander-modal-overlay" id="wanderForkModal" role="dialog" aria-modal="true" aria-label="Choose your path">
+      <!-- Content injected by game.js -->
+    </div>
+
+    <!-- ═══ CHALLENGE MODAL ══════════════════════════════════ -->
+    <div class="wander-modal-overlay" id="wanderChallengeModal" role="dialog" aria-modal="true" aria-label="Challenge encounter">
+      <!-- Content injected by game.js -->
+    </div>
+
+    <!-- ═══ CRYSTAL PEEK OVERLAY ════════════════════════════ -->
+    <div class="wander-peek-overlay" id="wanderPeekOverlay" role="dialog" aria-modal="true" aria-label="Crystal vision">
+      <!-- Content injected by game.js -->
+    </div>
+
   </div><!-- /.game-section__inner -->
 
   <!-- Minigame overlay — do not remove, used by minigames.js -->
