@@ -30,7 +30,11 @@ export default async function handler(req, res) {
 
       if (error) {
         // Table may not exist yet — return empty array gracefully
-        if (error.code === "42P01") return json(res, 200, []);
+        // Supabase may return code 42P01, or message about "relation" not existing
+        if (error.code === "42P01" || (error.message && error.message.includes('relation')) ||
+            (error.message && error.message.includes('does not exist'))) {
+          return json(res, 200, []);
+        }
         throw error;
       }
 
@@ -71,7 +75,14 @@ export default async function handler(req, res) {
         created_at: timestamp,
       });
 
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist yet, return a helpful message
+        if (error.code === "42P01" || (error.message && error.message.includes('relation')) ||
+            (error.message && error.message.includes('does not exist'))) {
+          return json(res, 503, { error: "Pinboard not set up yet" });
+        }
+        throw error;
+      }
 
       return json(res, 201, {
         id,
@@ -93,7 +104,9 @@ export default async function handler(req, res) {
 
     return json(res, 405, { error: "Method not allowed" });
   } catch (err) {
-    console.error("pins handler error:", err);
+    console.error("pins handler error:", err?.message || err);
+    // If the table simply doesn't exist, degrade gracefully for GET
+    if (req.method === "GET") return json(res, 200, []);
     return json(res, 500, { error: "Internal server error" });
   }
 }

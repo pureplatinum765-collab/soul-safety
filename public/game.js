@@ -1534,9 +1534,8 @@
         updatePlayerCards();
         updateItemButtons();
 
-        /* Auto-switch the user selector to the next player (shared device) */
-        autoSwitchUser(gameState.currentTurn);
-        setRollBtnEnabled(true);
+        /* Refresh button — shows whose turn it is and enables/disables accordingly */
+        refreshRollBtn();
       }
 
       /* Save state */
@@ -1614,8 +1613,10 @@
         if (gs.raphael !== undefined) gameState.raphael.pos = Math.max(0, Math.min(24, gs.raphael || 0));
         if (gs.taylor  !== undefined) gameState.taylor.pos  = Math.max(0, Math.min(24, gs.taylor  || 0));
       }
-      /* Don't let server overwrite currentTurn — we manage turns locally for the v3 board */
-      /* if (gs.currentTurn) gameState.currentTurn = gs.currentTurn; */
+      /* Sync turns from server so both devices stay in sync */
+      if (gs.currentTurn && !gameState.rolling && !isAnimating && !diceRolling) {
+        gameState.currentTurn = gs.currentTurn;
+      }
       if (gs.winner) gameState.winner = gs.winner;
       if (gs.raphaelPts !== undefined) gameState.raphael.pts = gs.raphaelPts || 0;
       if (gs.taylorPts  !== undefined) gameState.taylor.pts  = gs.taylorPts  || 0;
@@ -1641,8 +1642,7 @@
           winOverlay.classList.add('win-visible');
         }
       } else {
-        var curUser = getCurrentUser();
-        setRollBtnEnabled(curUser === gameState.currentTurn && !isAnimating);
+        refreshRollBtn();
       }
     }
 
@@ -1668,12 +1668,31 @@
     }, 5000);
 
     /* ── 34. ROLL BUTTON ────────────────────────────── */
-    /* Auto-switch the active user to match whose turn it is.
-       Since both players share a device, we auto-select the correct player. */
-    function autoSwitchUser(uid) {
-      if (typeof window.selectUser === 'function' && window.currentUser !== uid) {
-        window.selectUser(uid, false);
+
+    /* Update roll button label and enabled state to reflect whose turn it is */
+    function refreshRollBtn() {
+      if (!rollBtn) return;
+      var curUser = getCurrentUser();
+      var isTurn = curUser === gameState.currentTurn;
+      var otherName = gameState.currentTurn === 'raphael' ? 'Raphael' : 'Taylor';
+      if (!isTurn && !gameState.winner && !gameState.rolling && !isAnimating && !diceRolling) {
+        rollBtn.textContent = '⏳ ' + otherName + "'s Turn";
+        setRollBtnEnabled(false);
+      } else if (!gameState.winner && !gameState.rolling && !isAnimating && !diceRolling &&
+                 !gameState.pendingChallenge && !gameState.pendingFork &&
+                 !gameState.pendingSparkRoll && !gameState.pendingMinigame) {
+        rollBtn.textContent = '🎲 Roll the Dice';
+        setRollBtnEnabled(true);
       }
+    }
+
+    /* Listen for user-selector changes to refresh button immediately */
+    var origSelectForGame = window.selectUser;
+    if (origSelectForGame) {
+      window.selectUser = function(userId, save) {
+        origSelectForGame.call(this, userId, save);
+        refreshRollBtn();
+      };
     }
 
     if (rollBtn) {
@@ -1681,9 +1700,13 @@
         if (gameState.rolling || isAnimating || diceRolling || gameState.winner) return;
         if (gameState.pendingChallenge || gameState.pendingFork || gameState.pendingSparkRoll || gameState.pendingMinigame) return;
 
-        /* Auto-switch user to current turn holder (shared device) */
-        autoSwitchUser(gameState.currentTurn);
-        var curUser = gameState.currentTurn;
+        /* Enforce turn ownership — you can only roll when it's YOUR turn */
+        var curUser = getCurrentUser();
+        if (curUser !== gameState.currentTurn) {
+          var who = gameState.currentTurn === 'raphael' ? 'Raphael' : 'Taylor';
+          setNarrative('⏳ It\'s ' + who + '\'s turn — switch to ' + who + ' to roll.');
+          return;
+        }
 
         gameState.rolling = true;
         setRollBtnEnabled(false);
@@ -1832,6 +1855,7 @@
     snapTokenToTile(raphael3D, 0, 'forest', -0.35);
     snapTokenToTile(taylor3D,  0, 'forest',  0.35);
     loadGameState();
+    refreshRollBtn();
     animate();
 
     /* Debug helpers */
