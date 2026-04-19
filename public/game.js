@@ -632,7 +632,10 @@
       treeData.forEach(function (td, idx) {
         var h = 2.5 + Math.random() * 2.5;
         var tg = new THREE.Group();
-        tg.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, h * 0.35, 7), new THREE.MeshPhongMaterial({ color: 0x5c3a1e })), { position: { x: 0, y: h * 0.175, z: 0 }, castShadow: true }));
+        var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, h * 0.35, 7), new THREE.MeshPhongMaterial({ color: 0x5c3a1e }));
+        trunk.position.set(0, h * 0.175, 0);
+        trunk.castShadow = true;
+        tg.add(trunk);
         for (var layer = 0; layer < 3; layer++) {
           var cone = new THREE.Mesh(new THREE.ConeGeometry(0.9 - layer * 0.2, h * 0.45, 8), new THREE.MeshPhongMaterial({ color: greens[(idx + layer) % greens.length] }));
           cone.position.y = h * (0.38 + layer * 0.22);
