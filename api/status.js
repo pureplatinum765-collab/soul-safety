@@ -4,15 +4,26 @@ import { getSupabase } from "../lib/db.js";
 import { json, nowTs, upsertUser, safeJson } from "../lib/helpers.js";
 
 // Consolidated status router:
-// POST /api/read    → mark messages read
-// POST /api/typing  → update typing status
+// GET  /api/client-config → return public Supabase config (no auth required)
+// POST /api/read          → mark messages read
+// POST /api/typing        → update typing status
 
 export default async function handler(req, res) {
   if (cors(req, res)) return;
-  if (req.method !== "POST") return json(res, 405, { error: "Method not allowed" });
 
   const url = req.url || "";
-  const subpath = url.replace(/^\/api\//, "").split("?")[0]; // "read" or "typing"
+  const subpath = url.replace(/^\/api\//, "").split("?")[0]; // "read", "typing", or "client-config"
+
+  // --- GET /api/client-config (no auth required) ---
+  if (subpath === "client-config") {
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    return json(res, 200, {
+      supabaseUrl: process.env.SUPABASE_URL || "",
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+    });
+  }
+
+  if (req.method !== "POST") return json(res, 405, { error: "Method not allowed" });
 
   try {
     const auth = await isAuthorized(req);

@@ -9,8 +9,11 @@
     { "source": "/api/challenges", "destination": "/api/challenge" },
     { "source": "/api/challenge/:path*", "destination": "/api/challenge" },
     { "source": "/api/daily-spark/:path*", "destination": "/api/daily-spark" },
-    { "source": "/api/reactions/:path*", "destination": "/api/reactions" },
+    { "source": "/api/social/:path*", "destination": "/api/social" },
+    { "source": "/api/pins/:path*", "destination": "/api/pins" },
     { "source": "/api/read", "destination": "/api/status" },
-    { "source": "/api/typing", "destination": "/api/status" }
+    { "source": "/api/typing", "destination": "/api/status" },
+    { "source": "/api/client-config", "destination": "/api/status" },
+    { "source": "/api/verify-pin", "destination": "/api/auth" }
   ]
 }

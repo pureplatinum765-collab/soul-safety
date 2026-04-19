@@ -165,6 +165,7 @@
     }
     _rpsState = null;
     _lwState = null;
+    window.__boardMinigameActive = false;
   }
 
   window.closeMinigameModal = closeModal;
@@ -234,7 +235,33 @@
 
   /* ─── RESULT SCREEN ─────────────────────────── */
   function showGameResult(opts) {
-    // opts: { emoji, title, sub, onPlayAgain, onBack, backLabel, gameKey, gameEmoji, gameTitle }
+    // opts: { emoji, title, sub, onPlayAgain, onBack, backLabel, gameKey, gameEmoji, gameTitle, won }
+
+    /* Board-game integration: if a board-game challenge launched this minigame,
+       show a simplified result screen and fire the callback instead of
+       showing Play Again / Back buttons. */
+    if (window.__boardMinigameActive && typeof window.__boardGameResultCallback === 'function') {
+      var won = !!opts.won;
+      setModalContent(`
+        <div class="mg-result-screen">
+          <div class="mg-result-emoji">${opts.emoji}</div>
+          <div class="mg-result-title">${opts.title}</div>
+          <div class="mg-result-sub">${opts.sub}</div>
+          <div class="mg-result-actions">
+            <button class="mg-btn mg-btn-primary" id="mgBoardReturn">${won ? '🏆 Claim Reward' : '😤 Back to Board'}</button>
+          </div>
+        </div>
+      `);
+      document.getElementById('mgBoardReturn').addEventListener('click', function () {
+        window.__boardMinigameActive = false;
+        closeModal();
+        if (typeof window.__boardGameResultCallback === 'function') {
+          window.__boardGameResultCallback(won);
+        }
+      });
+      return;
+    }
+
     setModalContent(`
       <div class="mg-result-screen">
         <div class="mg-result-emoji">${opts.emoji}</div>
@@ -812,7 +839,7 @@
       sub = 'Score: ' + s1 + ' — ' + s2;
     }
     showGameResult({
-      emoji, title, sub,
+      emoji, title, sub, won: iWon,
       onPlayAgain: function() { openPong(mode); },
       onBack: function() { showModeSelect('pong', '🏓', 'Pong Challenge'); }
     });
@@ -1171,6 +1198,7 @@
       emoji: won ? '🎉' : tied ? '🤝' : '😅',
       title: won ? 'You win!' : tied ? "It's a tie!" : 'They win this time!',
       sub: wins + 'W — ' + losses + 'L — ' + draws + 'D',
+      won: won,
       onPlayAgain: function() { openRPS(mode); },
       onBack: function() { showModeSelect('rps', '✂️', 'Rock Paper Scissors'); }
     });
@@ -1662,7 +1690,7 @@
         : 'The word was "' + answer.toUpperCase() + '"';
     }
     showGameResult({
-      emoji, title, sub,
+      emoji, title, sub, won: iWon,
       onPlayAgain: function() { openLuckyWord(mode); },
       onBack: function() { showModeSelect('lucky-word', '🍀', 'Lucky Word'); }
     });

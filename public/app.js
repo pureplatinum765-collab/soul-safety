@@ -726,7 +726,7 @@ async function setMood(userId, emoji, text) {
   
   // Persist to backend
   try {
-    await apiPost('/api/mood', { user_id: userId, emoji, text });
+    await apiPost('/api/social/mood', { user_id: userId, emoji, text });
   } catch (e) {
     console.error('Failed to save mood:', e);
   }
@@ -947,7 +947,7 @@ async function toggleReaction(messageId, emoji) {
   
   // Send to backend
   try {
-    await apiPost(`/api/reactions/${messageId}`, { user_id: currentUser, emoji });
+    await apiPost(`/api/social/reactions/${messageId}`, { user_id: currentUser, emoji });
   } catch (e) {
     console.error('Failed to toggle reaction:', e);
   }

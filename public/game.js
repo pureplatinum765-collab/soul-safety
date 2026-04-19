@@ -826,6 +826,7 @@
       pendingFork: null,      /* { uid } */
       pendingSparkRoll: null, /* { uid, roll1, roll2 } */
       pendingTrade: null,     /* { uid } */
+      pendingMinigame: null,  /* { uid, gameKey } */
     };
 
     var isAnimating  = false;
@@ -1164,7 +1165,7 @@
       var offset = uid === 'raphael' ? -0.35 : 0.35;
       animateMoveToken(mesh, fromPos, toPos, pc, offset, function () {
         gameState[uid].pos = toPos;
-        afterMove(uid, toPos, null, true);
+        endTurn(uid);
       });
     }
 
@@ -1189,123 +1190,126 @@
       });
     }
 
-    /* ── 25. CHALLENGE MODAL ────────────────────────── */
-    function showChallengeModal(uid, challengeIdx) {
+    /* ── 25. MINIGAME CHALLENGE SYSTEM ──────────────── */
+    /* Instead of text-based choices, challenge tiles launch
+       a real minigame (Pong, RPS, or Lucky Word) vs AI.
+       Win → advance 3 tiles + get an item.
+       Lose → fall back 2 tiles. */
+
+    var MINIGAME_CHALLENGES = [
+      { key: 'pong',       emoji: '🏓', name: 'Pong' },
+      { key: 'rps',        emoji: '✂️', name: 'Rock Paper Scissors' },
+      { key: 'lucky-word', emoji: '🍀', name: 'Lucky Word' },
+    ];
+
+    function showChallengeModal(uid /*, challengeIdx — unused now */) {
       if (!challengeModal) return;
-      var ch = CHALLENGES[challengeIdx % CHALLENGES.length];
-      var inv = gameState[uid].inventory;
-      var html = '<div class="modal-title">⚔️ Challenge!</div>';
-      html += '<div class="modal-text">' + ch.text + '</div>';
-      html += '<div class="modal-detail">' + ch.detail + '</div>';
-      html += '<div class="modal-choices">';
-      ch.options.forEach(function (opt) {
-        var disabled = (opt.requiresItem && inv.length === 0) ? ' disabled' : '';
-        var dis2 = opt.requiresItem && inv.length === 0 ? ' btn-disabled' : '';
-        html += '<button class="btn-challenge' + dis2 + '" data-action="' + opt.action + '"' + disabled + '>' + opt.label + '</button>';
+      gameState.pendingMinigame = { uid: uid };
+
+      var html = '<div class="modal-title">⚔️ Minigame Challenge!</div>';
+      html += '<div class="modal-text">The path demands proof of skill. Choose your challenge:</div>';
+      html += '<div class="modal-choices modal-choices--minigame">';
+      MINIGAME_CHALLENGES.forEach(function (mg) {
+        html += '<button class="btn-challenge btn-minigame-pick" data-minigame="' + mg.key + '">';
+        html += '<span class="mg-pick-emoji">' + mg.emoji + '</span> ';
+        html += mg.name;
+        html += '</button>';
       });
       html += '</div>';
+      html += '<div class="modal-detail">Win to leap forward. Lose and you stumble back.</div>';
       challengeModal.innerHTML = html;
       challengeModal.classList.add('modal-visible');
 
-      challengeModal.querySelectorAll('[data-action]').forEach(function (btn) {
+      challengeModal.querySelectorAll('[data-minigame]').forEach(function (btn) {
         btn.addEventListener('click', function () {
-          var action = this.dataset.action;
+          var gameKey = this.dataset.minigame;
           challengeModal.classList.remove('modal-visible');
-          resolveChallengeAction(uid, action);
+          launchBoardMinigame(uid, gameKey);
         });
       });
     }
 
-    function resolveChallengeAction(uid, action) {
-      var pos = gameState[uid].pos;
-      var pc  = gameState[uid].path_choice;
+    /* Launch a minigame in practice (vs AI) mode, with a result callback */
+    function launchBoardMinigame(uid, gameKey) {
+      gameState.pendingMinigame = { uid: uid, gameKey: gameKey };
+      var playerName = uid === 'raphael' ? 'Raphael' : 'Taylor';
+      setNarrative(playerName + ' enters the ' + gameKey + ' challenge...');
+
+      /* Hook into the minigame result system.
+         We override window.closeMinigameModal to intercept when the modal closes,
+         and we monkey-patch showGameResult to capture win/loss. */
+      var origShowResult = window.__boardGameShowResult;
+
+      window.__boardGameResultCallback = function (won) {
+        window.__boardGameResultCallback = null;
+        /* Small delay so the result screen shows before we resolve */
+        setTimeout(function () {
+          resolveMinigameResult(uid, gameKey, won);
+        }, 600);
+      };
+
+      /* Use the existing minigames.js practice mode launchers.
+         These are inside the IIFE but they expose launchGame via the
+         mode-select flow. We'll directly trigger practice mode. */
+      if (gameKey === 'pong') {
+        triggerMinigamePractice('pong', '🏓', 'Pong Challenge — Board Game');
+      } else if (gameKey === 'rps') {
+        triggerMinigamePractice('rps', '✂️', 'Rock Paper Scissors — Board Game');
+      } else if (gameKey === 'lucky-word') {
+        triggerMinigamePractice('lucky-word', '🍀', 'Lucky Word — Board Game');
+      }
+    }
+
+    /* Trigger a practice-mode minigame by simulating the launch flow */
+    function triggerMinigamePractice(gameKey, emoji, title) {
+      /* The minigames.js exposes: showModeSelect → user picks practice → launchGame(key, 'practice').
+         We skip the mode-select and directly fire the practice button click. 
+         We'll do this by setting a global flag and programmatically launching. */
+      window.__boardMinigameActive = true;
+
+      /* Find the minigame overlay and trigger it */
+      var overlay = document.getElementById('minigameOverlay');
+      if (overlay) overlay.hidden = false;
+
+      /* Simulate a launch-button click to trigger mode select, then auto-pick practice */
+      var launchBtns = document.querySelectorAll('[data-minigame-launch="' + gameKey + '"]');
+      if (launchBtns.length > 0) {
+        launchBtns[0].click();
+        /* Wait for mode select to render, then auto-click practice */
+        setTimeout(function () {
+          var practiceBtn = document.getElementById('mgPracticeBtn');
+          if (practiceBtn) practiceBtn.click();
+        }, 100);
+      }
+    }
+
+    function resolveMinigameResult(uid, gameKey, won) {
+      gameState.pendingMinigame = null;
+      gameState.pendingChallenge = null;
+
+      var pos    = gameState[uid].pos;
+      var pc     = gameState[uid].path_choice;
       var mesh   = uid === 'raphael' ? raphael3D : taylor3D;
       var offset = uid === 'raphael' ? -0.35 : 0.35;
+      var name   = uid === 'raphael' ? 'Raphael' : 'Taylor';
+      var mg     = MINIGAME_CHALLENGES.find(function (m) { return m.key === gameKey; });
+      var mgName = mg ? mg.name : gameKey;
 
-      if (action === 'challenge_safe') {
-        var safePos = advancePos(pos, 1, pc);
-        setNarrative('← Safe path taken. +1 tile.');
-        animateMoveToken(mesh, pos, safePos, pc, offset, function () {
-          gameState[uid].pos = safePos;
-          endTurn(uid);
-        });
-      } else if (action === 'challenge_risky') {
-        var roll = Math.floor(Math.random() * 6) + 1;
-        if (roll >= 4) {
-          var riskyPos = advancePos(pos, 3, pc);
-          setNarrative('→ Risk paid off! Roll ' + roll + ' → +3 tiles!');
-          animateMoveToken(mesh, pos, riskyPos, pc, offset, function () {
-            gameState[uid].pos = riskyPos;
-            endTurn(uid);
-          });
-        } else {
-          var backPos = Math.max(0, pos - 2);
-          setNarrative('→ Too risky! Roll ' + roll + ' → back 2 tiles.');
-          animateMoveToken(mesh, pos, backPos, pc, offset, function () {
-            gameState[uid].pos = backPos;
-            endTurn(uid);
-          });
-        }
-      } else if (action === 'challenge_trade') {
-        var inv = gameState[uid].inventory;
-        if (inv.length > 0) {
-          inv.splice(0, 1); /* Remove first item */
-          syncInventoryToServer(uid);
-          var tradePos = advancePos(pos, 3, pc);
-          setNarrative('🎒 Trade accepted! +3 spaces forward.');
-          animateMoveToken(mesh, pos, tradePos, pc, offset, function () {
-            gameState[uid].pos = tradePos;
-            endTurn(uid);
-          });
-        } else {
-          setNarrative('No items to trade. Kept walking.');
-          endTurn(uid);
-        }
-      } else if (action === 'challenge_walk') {
-        setNarrative('Kept walking without incident.');
-        endTurn(uid);
-      } else if (action === 'challenge_sneak') {
-        if (Math.random() >= 0.5) {
-          setNarrative('🤫 Sneaked past the guardian without waking them!');
-          endTurn(uid);
-        } else {
-          setNarrative('💤 The guardian stirred — you lose your next turn!');
-          gameState[uid]._skipTurn = true;
-          endTurn(uid);
-        }
-      } else if (action === 'challenge_reroute') {
-        setNarrative('🔄 Found another route. Lose 1 turn but safe.');
-        gameState[uid]._skipTurn = true;
-        endTurn(uid);
-      } else if (action === 'challenge_stand') {
-        if (Math.random() >= 0.5) {
-          var stPos = advancePos(pos, 2, pc);
-          setNarrative('💪 You held firm! +2 spaces.');
-          animateMoveToken(mesh, pos, stPos, pc, offset, function () {
-            gameState[uid].pos = stPos;
-            endTurn(uid);
-          });
-        } else {
-          var slipPos = Math.max(0, pos - 1);
-          setNarrative('💪 Ground shook too hard... -1 space.');
-          animateMoveToken(mesh, pos, slipPos, pc, offset, function () {
-            gameState[uid].pos = slipPos;
-            endTurn(uid);
-          });
-        }
-      } else if (action === 'challenge_retreat') {
-        setNarrative('🏃 Retreated safely. No change.');
-        endTurn(uid);
-      } else if (action === 'challenge_riddle') {
-        /* Answer is "a map" */
-        var ridPos = advancePos(pos, 3, pc);
-        setNarrative('🧩 Answer: A Map! The stones reward you. +3 tiles!');
-        animateMoveToken(mesh, pos, ridPos, pc, offset, function () {
-          gameState[uid].pos = ridPos;
+      if (won) {
+        var advPos = advancePos(pos, 3, pc);
+        setNarrative('🏆 ' + name + ' won ' + mgName + '! +3 tiles forward!');
+        giveRandomItem(uid);
+        animateMoveToken(mesh, pos, advPos, pc, offset, function () {
+          gameState[uid].pos = advPos;
           endTurn(uid);
         });
       } else {
-        endTurn(uid);
+        var fallPos = Math.max(0, pos - 2);
+        setNarrative('😤 ' + name + ' lost ' + mgName + '. Back 2 tiles.');
+        animateMoveToken(mesh, pos, fallPos, pc, offset, function () {
+          gameState[uid].pos = fallPos;
+          endTurn(uid);
+        });
       }
     }
 
@@ -1527,8 +1531,9 @@
         updatePlayerCards();
         updateItemButtons();
 
-        var curUser = getCurrentUser();
-        setRollBtnEnabled(curUser === gameState.currentTurn);
+        /* Auto-switch the user selector to the next player (shared device) */
+        autoSwitchUser(gameState.currentTurn);
+        setRollBtnEnabled(true);
       }
 
       /* Save state */
@@ -1601,9 +1606,13 @@
       var gs = data.gameState || data;
       if (!gs) return;
 
-      if (gs.raphael !== undefined) gameState.raphael.pos = Math.max(0, Math.min(24, gs.raphael || 0));
-      if (gs.taylor  !== undefined) gameState.taylor.pos  = Math.max(0, Math.min(24, gs.taylor  || 0));
-      if (gs.currentTurn) gameState.currentTurn = gs.currentTurn;
+      /* Only apply server positions if we're not in the middle of local animation/challenge */
+      if (!isAnimating && !gameState.pendingChallenge && !gameState.pendingFork && !gameState.pendingMinigame) {
+        if (gs.raphael !== undefined) gameState.raphael.pos = Math.max(0, Math.min(24, gs.raphael || 0));
+        if (gs.taylor  !== undefined) gameState.taylor.pos  = Math.max(0, Math.min(24, gs.taylor  || 0));
+      }
+      /* Don't let server overwrite currentTurn — we manage turns locally for the v3 board */
+      /* if (gs.currentTurn) gameState.currentTurn = gs.currentTurn; */
       if (gs.winner) gameState.winner = gs.winner;
       if (gs.raphaelPts !== undefined) gameState.raphael.pts = gs.raphaelPts || 0;
       if (gs.taylorPts  !== undefined) gameState.taylor.pts  = gs.taylorPts  || 0;
@@ -1656,15 +1665,23 @@
     }, 5000);
 
     /* ── 34. ROLL BUTTON ────────────────────────────── */
+    /* Auto-switch the active user to match whose turn it is.
+       Since both players share a device, we auto-select the correct player. */
+    function autoSwitchUser(uid) {
+      if (typeof window.selectUser === 'function' && window.currentUser !== uid) {
+        window.selectUser(uid, false);
+      }
+    }
+
     if (rollBtn) {
       rollBtn.addEventListener('click', function () {
         if (gameState.rolling || isAnimating || diceRolling || gameState.winner) return;
-        if (gameState.pendingChallenge || gameState.pendingFork || gameState.pendingSparkRoll) return;
-        var curUser = getCurrentUser();
-        if (curUser !== gameState.currentTurn) {
-          setNarrative('It\'s ' + (gameState.currentTurn === 'raphael' ? 'Raphael\'s' : 'Taylor\'s') + ' turn!');
-          return;
-        }
+        if (gameState.pendingChallenge || gameState.pendingFork || gameState.pendingSparkRoll || gameState.pendingMinigame) return;
+
+        /* Auto-switch user to current turn holder (shared device) */
+        autoSwitchUser(gameState.currentTurn);
+        var curUser = gameState.currentTurn;
+
         gameState.rolling = true;
         setRollBtnEnabled(false);
         updateItemButtons();
@@ -1672,29 +1689,18 @@
         var sparkActive = gameState[curUser]._sparkActive;
         if (sparkActive) { gameState[curUser]._sparkActive = false; }
 
-        gamePost('game/move', { user_id: curUser }).then(function (data) {
+        /* Generate roll locally — the v3 board (25 tiles, forks, items)
+           runs client-side; the server just stores state. */
+        var roll = Math.floor(Math.random() * 6) + 1;
+        if (sparkActive) {
+          var roll2 = Math.floor(Math.random() * 6) + 1;
+          setNarrative('⚡ Spark! Rolled ' + roll + ' and ' + roll2 + '. Choose one!');
           gameState.rolling = false;
-          var roll = (data && data.roll) ? data.roll : Math.floor(Math.random() * 6) + 1;
-          if (sparkActive) {
-            var roll2 = Math.floor(Math.random() * 6) + 1;
-            setNarrative('⚡ Spark! Rolled ' + roll + ' and ' + roll2 + '. Choose one!');
-            showSparkRollAgain(curUser, roll, roll2);
-            if (data) applyServerState(data);
-          } else {
-            startDiceRoll(roll);
-            if (data) applyServerState(data);
-          }
-        }).catch(function () {
+          showSparkRollAgain(curUser, roll, roll2);
+        } else {
           gameState.rolling = false;
-          var roll = Math.floor(Math.random() * 6) + 1;
-          if (sparkActive) {
-            var roll2 = Math.floor(Math.random() * 6) + 1;
-            setNarrative('⚡ Spark! Rolled ' + roll + ' and ' + roll2 + '. Choose one!');
-            showSparkRollAgain(curUser, roll, roll2);
-          } else {
-            startDiceRoll(roll);
-          }
-        });
+          startDiceRoll(roll);
+        }
       });
     }
 
