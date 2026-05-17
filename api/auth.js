@@ -1,16 +1,13 @@
 import { cors } from "../lib/cors.js";
 import { getSupabase } from "../lib/db.js";
-import { isAuthorized, resolveActingUserId } from "../lib/auth.js";
-import { json, uuid, nowTs, hashPassword, buildSessionCookie, safeJson, ensureGamePlayer } from "../lib/helpers.js";
+import { isAuthorized, resolveActingUserId, parseAuthToken, parseCookies } from "../lib/auth.js";
+import { json, uuid, nowTs, hashPassword, verifyPassword, buildSessionCookie, safeJson, ensureGamePlayer } from "../lib/helpers.js";
 
-// Consolidated auth router: handles /api/auth/login, /api/auth/logout, /api/auth/me, /api/auth/signup
 export default async function handler(req, res) {
   if (cors(req, res)) return;
 
-  // Extract sub-path: req.url might be /api/auth/login, /api/verify-pin (rewrite), or just /api/auth
   const url = req.url || "";
-  let subpath = url.replace(/^\/api\/auth\/?/, "").split("?")[0]; // login, logout, me, signup, verify-pin
-  // Handle rewrites: /api/verify-pin → auth handler, extract 'verify-pin' from /api/verify-pin
+  let subpath = url.replace(/^\/api\/auth\/?/, "").split("?")[0];
   if (subpath === url || subpath.startsWith("api/")) {
     subpath = url.replace(/^\/api\//, "").split("?")[0];
   }
@@ -49,11 +46,17 @@ export default async function handler(req, res) {
       if (!user) return json(res, 401, { error: "Invalid credentials" });
 
       if (user.password_hash) {
-        const passwordHash = await hashPassword(password);
-        if (user.password_hash !== passwordHash) return json(res, 401, { error: "Invalid credentials" });
+        const ok = await verifyPassword(password, user.password_hash);
+        if (!ok) return json(res, 401, { error: "Invalid credentials" });
+
+        // Upgrade legacy SHA-256 hash to scrypt on successful login
+        if (!user.password_hash.startsWith("$scrypt$")) {
+          const upgraded = await hashPassword(password);
+          await db.from("users").update({ password_hash: upgraded }).eq("id", user.id);
+        }
       }
 
-      const userId = user.user_id || user.id || identifier;
+      const userId = user.id || identifier;
       await ensureGamePlayer(userId);
 
       const token = uuid().replace(/-/g, "") + uuid().replace(/-/g, "");
@@ -72,7 +75,6 @@ export default async function handler(req, res) {
   if (subpath === "logout") {
     if (req.method !== "POST") return json(res, 405, { error: "Method not allowed" });
     try {
-      const { parseAuthToken, parseCookies } = await import("../lib/auth.js");
       const token = parseAuthToken(req) || parseCookies(req).soul_safety_session || "";
       if (token) {
         const db = getSupabase();
@@ -94,12 +96,8 @@ export default async function handler(req, res) {
       const providedPin = typeof body?.pin === "string" ? body.pin.trim() : "";
       const correctPin = process.env.SOUL_SAFETY_PIN || "";
       const apiToken = process.env.SOUL_SAFETY_API_TOKEN || "";
-      if (!correctPin) {
-        return json(res, 500, { ok: false, error: "Server misconfigured" });
-      }
-      if (providedPin !== correctPin) {
-        return json(res, 401, { ok: false, error: "Incorrect PIN" });
-      }
+      if (!correctPin) return json(res, 500, { ok: false, error: "Server misconfigured" });
+      if (providedPin !== correctPin) return json(res, 401, { ok: false, error: "Incorrect PIN" });
       return json(res, 200, { ok: true, token: apiToken });
     } catch (err) {
       console.error("verify-pin error:", err);
