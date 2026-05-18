@@ -1,4 +1,4 @@
-import { supabase } from '../lib/db.js';
+import { getSupabase } from '../lib/db.js';
 import { CORS_HEADERS } from '../lib/cors.js';
 
 // One-time setup endpoint - creates all tables via Supabase RPC
@@ -141,9 +141,18 @@ export default async function handler(req, res) {
         about TEXT,
         text TEXT NOT NULL,
         created_at BIGINT NOT NULL DEFAULT extract(epoch from now())::bigint
+      )`,
+      `CREATE TABLE IF NOT EXISTS pins (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        user_id TEXT NOT NULL,
+        text TEXT NOT NULL,
+        image_url TEXT,
+        color TEXT NOT NULL DEFAULT 'cream',
+        created_at BIGINT NOT NULL DEFAULT extract(epoch from now())::bigint
       )`
     ];
 
+    const supabase = getSupabase();
     const results = [];
     for (const sql of tables) {
       const { error } = await supabase.rpc('exec_sql', { query: sql });

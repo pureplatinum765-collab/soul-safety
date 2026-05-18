@@ -153,6 +153,26 @@ CREATE TABLE IF NOT EXISTS spark_reflections (
   UNIQUE(spark_id, user_id)
 );
 
+-- Factoids (user-written notes about each other)
+CREATE TABLE IF NOT EXISTS factoids (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  about TEXT,
+  text TEXT NOT NULL,
+  created_at BIGINT NOT NULL DEFAULT extract(epoch from now())::bigint
+);
+
+-- Pins (pinboard notes with optional image and color)
+CREATE TABLE IF NOT EXISTS pins (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  text TEXT NOT NULL,
+  image_url TEXT,
+  color TEXT NOT NULL DEFAULT 'cream',
+  created_at BIGINT NOT NULL DEFAULT extract(epoch from now())::bigint
+);
+CREATE INDEX IF NOT EXISTS idx_pins_created ON pins(created_at);
+
 -- Disable RLS on all tables for simplicity (auth is handled at the API layer)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all" ON users FOR ALL USING (true) WITH CHECK (true);
@@ -198,3 +218,9 @@ CREATE POLICY "Allow all" ON spark_shares FOR ALL USING (true) WITH CHECK (true)
 
 ALTER TABLE spark_reflections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all" ON spark_reflections FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE factoids ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON factoids FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE pins ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON pins FOR ALL USING (true) WITH CHECK (true);
