@@ -1,0 +1,80 @@
+name: Signing spike
+
+on:
+  push:
+    branches: [raphos-signing-spike]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sign:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Environment check
+        run: |
+          sw_vers
+          echo ---
+          which shortcuts
+          plutil -lint signing-spike/demo.shortcut
+
+      - name: Sign attempt 1 (clean runner, no prep)
+        id: sign1
+        continue-on-error: true
+        run: |
+          shortcuts sign -i signing-spike/demo.shortcut -o signing-spike/demo-signed.shortcut -m anyone > sign1.log 2>&1
+          ls -la signing-spike/demo-signed.shortcut >> sign1.log 2>&1
+          file signing-spike/demo-signed.shortcut >> sign1.log 2>&1
+
+      - name: Sign attempt 2 (after opening Shortcuts.app)
+        id: sign2
+        if: steps.sign1.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          open -a Shortcuts > sign2.log 2>&1 || echo "open -a Shortcuts failed" >> sign2.log
+          sleep 15
+          shortcuts sign -i signing-spike/demo.shortcut -o signing-spike/demo-signed.shortcut -m anyone >> sign2.log 2>&1
+          ls -la signing-spike/demo-signed.shortcut >> sign2.log 2>&1
+          file signing-spike/demo-signed.shortcut >> sign2.log 2>&1
+
+      - name: Upload signed artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-shortcut
+          path: signing-spike/demo-signed.shortcut
+          if-no-files-found: ignore
+
+      - name: Record result
+        if: always()
+        run: |
+          VERDICT=SIGNING_FAILED
+          [ -f signing-spike/demo-signed.shortcut ] && VERDICT=SIGNING_WORKS
+          {
+            echo "# Signing spike result"
+            echo
+            echo "- OS: $(sw_vers -productVersion) ($(uname -m))"
+            echo "- shortcuts: $(which shortcuts)"
+            echo "- Attempt 1 (clean runner): ${{ steps.sign1.outcome }}"
+            echo "- Attempt 2 (after opening Shortcuts.app): ${{ steps.sign2.outcome }}"
+            echo "- Verdict: $VERDICT"
+            echo
+            echo "## Attempt 1 output"
+            echo "```text"
+            cat sign1.log 2>/dev/null || echo "(no log)"
+            echo "```"
+            echo
+            echo "## Attempt 2 output"
+            echo "```text"
+            cat sign2.log 2>/dev/null || echo "(not run)"
+            echo "```"
+          } > signing-spike/RESULT.md
+          cat signing-spike/RESULT.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add signing-spike/RESULT.md
+          git commit -m "Record signing spike result [skip ci]" || echo "nothing to commit"
+          git push
